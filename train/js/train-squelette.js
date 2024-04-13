@@ -303,10 +303,59 @@ function tchou(){
 
 	// Dessine le plateau
 	dessine_plateau(contexte, plateau);
+	recuperer_classe();
+	changer_case(contexte, plateau);
 
 }
 
-/************************************************************/
+const canva = document.getElementById('simulateur');
+function selectionner_case(plateau){
+	
+	canva.addEventListener('click', function(e){
+		const x = Math.floor(e.offsetX / LARGEUR_CASE);
+		const y = Math.floor(e.offsetY / HAUTEUR_CASE);
+		console.log(x,y);
+		console.log(plateau.cases[x][y]);
+	});
+}
+function recuperer_classe(){
+	let lastClickedButtonId = null;
+
+	function handleButtonClick(event) {
+		// Get the ID of the clicked button from the event target
+		const buttonId = event.target.id;
+
+		// Update the last clicked button ID
+		lastClickedButtonId = buttonId;
+
+		// Optionally, display the current last clicked button ID
+		console.log(lastClickedButtonId);
+	}
+
+	// Add event listeners to each button
+	document.querySelectorAll('button').forEach(button => {
+		button.addEventListener('click', handleButtonClick);
+	});
+	return lastClickedButtonId;
+}
+
+function changer_case(contexte, plateau){
+	canva.addEventListener('click', function(e){
+		const x = Math.floor(e.offsetX / LARGEUR_CASE);
+		const y = Math.floor(e.offsetY / HAUTEUR_CASE);
+		console.log(x,y);
+		console.log(plateau.cases[x][y]);
+		const lastClickedButtonId = recuperer_classe();
+		let classe = "Type_de_case."+lastClickedButtonId;
+		plateau.cases[x][y] = classe;
+		contexte.clearRect(x * LARGEUR_CASE, y * HAUTEUR_CASE, LARGEUR_CASE, HAUTEUR_CASE);
+
+		dessine_case(contexte,plateau,x,y);
+		console.log(plateau.cases[x][y]);  
+	});
+}
+
+/**********************************************************string**/
 // Programme principal
 /************************************************************/
 // NOTE: rien à modifier ici !
@@ -314,3 +363,4 @@ window.addEventListener("load", () => {
 	// Appel à la fonction principale
 	tchou();
 });
+
