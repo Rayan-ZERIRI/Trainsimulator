@@ -94,7 +94,7 @@ IMAGE_WAGON.src = 'images/wagon.png';
 /************************************************************/
 // Variables globales
 /************************************************************/
-
+let dernierBoutonClique = null;
 // TODO
 
 
@@ -149,15 +149,21 @@ function image_of_case(type_de_case){
 }
 
 
-function dessine_case(contexte, plateau, x, y){
-	const la_case = plateau.cases[x][y];
+function dessine_case(contexte, plateau, x, y) {
+    const la_case = plateau.cases[x][y];
+    let image_a_afficher = image_of_case(la_case);
 
-	// NOTE: à améliorer
+    // Check if the type of case contains "rail" in its name
+    if (la_case.nom.includes('rail')) {
+        // Change the background color to grey
+        contexte.fillStyle = 'grey';
+        contexte.fillRect(x * LARGEUR_CASE, y * HAUTEUR_CASE, LARGEUR_CASE, HAUTEUR_CASE);
+    }
 
-	let image_a_afficher = image_of_case(la_case);
-	// Affiche l'image concernée
-	contexte.drawImage(image_a_afficher, x * LARGEUR_CASE, y * HAUTEUR_CASE, LARGEUR_CASE, HAUTEUR_CASE);
+    // Draw the image
+    contexte.drawImage(image_a_afficher, x * LARGEUR_CASE, y * HAUTEUR_CASE, LARGEUR_CASE, HAUTEUR_CASE);
 }
+
 
 function dessine_plateau(page, plateau){
 	// Dessin du plateau avec paysages et rails
@@ -345,34 +351,43 @@ const correspondances = {
 
 // recupère l'id du bouton cliqué et retourne le type de case associé
 function handleButtonClick(event) {
-		
-	const buttonId = event.target.id;
-		
-	console.log(buttonId);
-	if (buttonId in correspondances) {
-		console.log(correspondances[buttonId]);
-		// Récupérer le type de case associé à l'ID du bouton
-		type_de_case = correspondances[buttonId];
-		return type_de_case;
-		
-	}
-
+    const buttonId = event.target.id;
+    if (buttonId in correspondances) {
+        type_de_case = correspondances[buttonId];
+        dernierBoutonClique = type_de_case; // Update last clicked button type
+        console.log("Last button clicked:", dernierBoutonClique); // Optional: log the last clicked type
+    }
 }
 
-// récupère les coordonnées de la case cliquée
-function recuperer_case(event, contexte, plateau, type_de_case) {
-	
-		const x = Math.floor(event.offsetX/LARGEUR_CASE);
-		const y = Math.floor(event.offsetY/HAUTEUR_CASE);
-		dessine_case2(contexte, plateau, x, y, type_de_case);
-		canva.removeEventListener('click', recuperer_case);
+function recuperer_case(event, contexte, plateau) {
+    const x = Math.floor(event.offsetX / LARGEUR_CASE);
+    const y = Math.floor(event.offsetY / HAUTEUR_CASE);
+    dessine_case2(contexte, plateau, x, y, dernierBoutonClique); // Use the last clicked button type here
+
+    canva.removeEventListener('click', recuperer_case);
 }
 
-function dessine_case2(contexte, plateau, x, y, type_de_case){
-	let image_a_afficher = image_of_case(type_de_case);
-	contexte.drawImage(image_a_afficher, x * LARGEUR_CASE, y * HAUTEUR_CASE, LARGEUR_CASE, HAUTEUR_CASE);
-	canva.removeEventListener('click', recuperer_case);
+function dessine_case2(contexte, plateau, x, y, type_de_case) {
+    // Check if the type of case is a rail
+    if (type_de_case === Type_de_case.Rail_horizontal ||
+        type_de_case === Type_de_case.Rail_vertical ||
+        type_de_case === Type_de_case.Rail_droite_vers_haut ||
+        type_de_case === Type_de_case.Rail_haut_vers_droite ||
+        type_de_case === Type_de_case.Rail_droite_vers_bas ||
+        type_de_case === Type_de_case.Rail_bas_vers_droite) {
+        // Set a grey background for the rail tile
+        contexte.fillStyle = 'grey'; // A shade of grey
+        contexte.fillRect(x * LARGEUR_CASE, y * HAUTEUR_CASE, LARGEUR_CASE, HAUTEUR_CASE);
+    }
+
+    // Get the image associated with the type of tile
+    let image_a_afficher = image_of_case(type_de_case);
+    
+    // Draw the image over the background (grey or transparent)
+    contexte.drawImage(image_a_afficher, x * LARGEUR_CASE, y * HAUTEUR_CASE, LARGEUR_CASE, HAUTEUR_CASE);
 }
+
+
 	
 
 
