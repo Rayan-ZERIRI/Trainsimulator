@@ -297,15 +297,32 @@ function tchou(){
     cree_plateau_initial(plateau);
     dessine_plateau(contexte, plateau);
 
-    document.querySelectorAll('button').forEach(button => {
-        button.addEventListener('click', function(event) {
-            type_de_case = handleButtonClick(event);
-            // Attacher l'événement de récupération des coordonnées seulement si ce n'est pas déjà fait
-                canva.addEventListener('click', function(event) {
-                    recuperer_case(event, contexte, plateau, type_de_case);
-                });
-        });
-    });
+	let dernierBoutonClique = null; // Stocke une référence vers le dernier bouton cliqué
+
+	document.querySelectorAll('button').forEach(button => {
+	button.addEventListener('click', function(event) {
+		// Récupérer le type de case associé au bouton
+		const typeDeCase = handleButtonClick(event);
+
+		// Désactiver le dernier bouton cliqué s'il existe
+		if (dernierBoutonClique) {
+			dernierBoutonClique.disabled = false; // Réactiver le dernier bouton cliqué
+		}
+
+		// Désactiver le bouton actuel
+		event.target.disabled = true;
+
+		// Stocker une référence vers le bouton actuel
+		dernierBoutonClique = event.target;
+
+		// Attacher l'événement pour récupérer les coordonnées de la case
+		canva.addEventListener('click', function(event) {
+			recuperer_case(event, contexte, plateau, typeDeCase);
+		});
+	});
+});
+
+	
 }
 
 	
