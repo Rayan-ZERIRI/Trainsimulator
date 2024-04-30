@@ -219,9 +219,7 @@ function dessine_plateau(page, plateau){
 
 function cree_plateau_initial(plateau){
 	// Circuit
-	plateau.cases[12][7] = Type_de_case.Rail_horizontal;
-	plateau.cases[13][7] = Type_de_case.Rail_horizontal;
-	plateau.cases[14][7] = Type_de_case.Rail_horizontal;
+	
 	plateau.cases[15][7] = Type_de_case.Rail_horizontal;
 	plateau.cases[16][7] = Type_de_case.Rail_horizontal;
 	plateau.cases[17][7] = Type_de_case.Rail_horizontal;
@@ -315,6 +313,12 @@ function cree_plateau_initial(plateau){
 	plateau.cases[21][11] = Type_de_case.Eau;
 	plateau.cases[21][12] = Type_de_case.Eau;
 	plateau.cases[21][13] = Type_de_case.Eau;
+	plateau.cases[12][7] = Train.train;  // Locomotive at this position
+	plateau.cases[13][7] = Train.wagon;  // Wagon following the locomotive
+	plateau.cases[14][7] = Train.wagon;
+	plateau.cases[12][7] = Type_de_case.Rail_horizontal;
+	plateau.cases[13][7] = Type_de_case.Rail_horizontal;
+	plateau.cases[14][7] = Type_de_case.Rail_horizontal;
 }
 
 
@@ -324,42 +328,114 @@ function cree_plateau_initial(plateau){
 
 let type_de_case;
 let globalX, globalY;
-function tchou(){
+function tchou() {
     console.log("Tchou, attention au départ !");
     const contexte = document.getElementById('simulateur').getContext("2d");
     let plateau = new Plateau();
     cree_plateau_initial(plateau);
     dessine_plateau(contexte, plateau);
+    setUpButtonClickEvents(contexte, plateau);
 
-	let dernierBoutonClique = null; // Stocke une référence vers le dernier bouton cliqué
-
-	document.querySelectorAll('button').forEach(button => {
-	button.addEventListener('click', function(event) {
-		// Récupérer le type de case associé au bouton
-		 type_de_case = handleButtonClick(event);
-
-
-		// Désactiver le dernier bouton cliqué s'il existe
-		if (dernierBoutonClique) {
-			dernierBoutonClique.disabled = false; // Réactiver le dernier bouton cliqué
-		}
-
-		// Désactiver le bouton actuel
-		event.target.disabled = true;
-
-		// Stocker une référence vers le bouton actuel
-		dernierBoutonClique = event.target;
-
-		// Attacher l'événement pour récupérer les coordonnées de la case
-		canva.addEventListener('click', function(event) {
-			recuperer_case(event, contexte, plateau);
-			console.log(type_de_case);
-		});
-	});
-});
-
-	
+    // Temporisateur pour faire avancer les trains
+    setInterval(() => {
+        // Logique pour faire avancer les trains
+        // Vous pouvez appeler une fonction spécifique pour cela
+        avancerTrains(plateau, contexte);
+    }, 500); // 500 ms = 2 coups par seconde
 }
+
+// Fonction pour avancer les trains
+function avancerTrains(plateau, contexte) {
+    for (let x = 0; x < plateau.largeur; x++) {
+        for (let y = 0; y < plateau.hauteur; y++) {
+            const caseActuelle = plateau.cases[x][y];
+
+            // Vérifier si la case contient un train
+            // Vérifier si la case contient un train
+			if (caseActuelle instanceof Train) {
+				// Obtenez le type de train
+				const typeDeTrain = caseActuelle;
+
+				// Déplacements possibles pour chaque type de train
+				// Vous devrez peut-être ajuster ces valeurs en fonction de votre logique spécifique
+				let deplacementX = 0;
+				let deplacementY = 0;
+
+				// Mettez à jour les coordonnées du train en fonction de son type
+				switch (typeDeTrain) {
+					case Train.train:
+						// Exemple : train se déplace vers la droite
+						deplacementX = 1;
+						break;
+					case Train.train2:
+						// Exemple : train se déplace vers le bas
+						deplacementY = 1;
+						break;
+					// Ajoutez des cas pour les autres types de train si nécessaire
+					default:
+						// Gestion par défaut si le type de train n'est pas reconnu
+						break;
+				}
+
+				// Vérifiez que le déplacement est autorisé en vérifiant la case suivante sur le plateau
+				// Si la case suivante est un rail valide, mettez à jour les coordonnées du train
+				const prochaineCaseX = x + deplacementX;
+				const prochaineCaseY = y + deplacementY;
+
+				// Vérifiez que les coordonnées de la case suivante sont valides et que la case suivante est un rail
+				if (prochaineCaseX >= 0 && prochaineCaseX < plateau.largeur &&
+					prochaineCaseY >= 0 && prochaineCaseY < plateau.hauteur &&
+					plateau.cases[prochaineCaseX][prochaineCaseY].nom.includes('rail')) {
+					// Mise à jour des coordonnées du train
+					plateau.cases[prochaineCaseX][prochaineCaseY] = caseActuelle;
+					plateau.cases[x][y] = Type_de_case.Rail_horizontal; // Remplacez la case actuelle par un paysage
+				} else {
+					// Le train ne peut pas avancer dans cette direction, implémentez une logique de gestion des collisions si nécessaire
+				}
+			}
+					}
+			}
+
+    // Actualiser le plateau après avoir fait avancer les trains
+    dessine_plateau(contexte, plateau);
+}
+
+
+
+function setUpButtonClickEvents(contexte, plateau) {
+    let dernierBoutonClique = null; // Stocke une référence vers le dernier bouton cliqué
+
+    document.querySelectorAll('button').forEach(button => {
+        button.addEventListener('click', function(event) {
+            // Récupérer le type de case associé au bouton
+            type_de_case = handleButtonClick(event);
+
+            // Désactiver le dernier bouton cliqué s'il existe
+            if (dernierBoutonClique) {
+                dernierBoutonClique.disabled = false; // Réactiver le dernier bouton cliqué
+            }
+
+            // Désactiver le bouton actuel
+            event.target.disabled = true;
+
+            // Stocker une référence vers le bouton actuel
+            dernierBoutonClique = event.target;
+
+            // Attacher l'événement pour récupérer les coordonnées de la case
+            canva.addEventListener('click', function(event) {
+                recuperer_case(event, contexte, plateau);
+                console.log(type_de_case);
+            });
+        });
+    });
+}
+
+function handleButtonClick(event) {
+    // Your existing button click handling code
+    // ...
+}
+
+// Other functions remain unchanged
 
 	
 const canva = document.getElementById('simulateur');
@@ -477,11 +553,11 @@ function dessine_case2(contexte, plateau, x, y, type_de_case) {
         contexte.fillStyle = 'grey'; // A shade of grey
         contexte.fillRect(x * LARGEUR_CASE, y * HAUTEUR_CASE, LARGEUR_CASE, HAUTEUR_CASE);
     }
-
+	
     // Get the image associated with the type of tile
     let image_a_afficher = image_of_case(type_de_case);
 	console.log(image_a_afficher);
-    
+    plateau.cases[x][y]=type_de_case;
     // Draw the image over the background (grey or transparent)
     contexte.drawImage(image_a_afficher, x * LARGEUR_CASE, y * HAUTEUR_CASE, LARGEUR_CASE, HAUTEUR_CASE);
 }
