@@ -41,19 +41,31 @@ class Type_de_case{
 	// NOTE: faisant la jonction de horizontal à vertical en allant vers la droite puis vers le haut (ou de vertical vers horizontal en allant de bas vers gauche)
 	static Rail_droite_vers_haut		= new Type_de_case('rail droite vers haut');
 
-	// NOTE: faisant la jonction de vertical à horizontal en allant vers le haut puis vers la droite (ou de horizontal à vertical en allant de gauche vers le bas)
+	// // NOTE: faisant la jonction de vertical à horizontal en allant vers le haut puis vers la droite (ou de horizontal à vertical en allant de gauche vers le bas)
 	static Rail_haut_vers_droite		= new Type_de_case('rail haut vers droite');
 
-	// NOTE: faisant la jonction de horizontal à vertical en allant vers la droite puis vers le bas (ou de vertical vers horizontal en allant de haut vers gauche)
+	// // NOTE: faisant la jonction de horizontal à vertical en allant vers la droite puis vers le bas (ou de vertical vers horizontal en allant de haut vers gauche)
 	static Rail_droite_vers_bas		= new Type_de_case('rail droite vers bas');
 
-	// NOTE: faisant la jonction de vertical à horizontal en allant vers le bas puis vers la droite (ou de horizontal à vertical en allant de gauche vers le haut)
+	// // NOTE: faisant la jonction de vertical à horizontal en allant vers le bas puis vers la droite (ou de horizontal à vertical en allant de gauche vers le haut)
 	static Rail_bas_vers_droite		= new Type_de_case('rail bas vers droite');
 
 	constructor(nom) {
 		this.nom = nom;
 	}
 }
+
+// class Rail extends Type_de_case {
+// 	static Rail_horizontal				= new Rail('rail horizontal',);
+// 	static Rail_vertical					= new Rail('rail vertical');
+// 	static Rail_droite_vers_haut			= new Rail('rail droite vers haut');
+// 	static Rail_haut_vers_droite			= new Rail('rail haut vers droite');
+// 	static Rail_droite_vers_bas			= new Rail('rail droite vers bas');
+// 	static Rail_bas_vers_droite			= new Rail('rail bas vers droite');
+// 	constructor(nom) {
+// 		super(nom);
+// 	}
+// }
 
 
 
@@ -101,6 +113,17 @@ let dernierBoutonClique = null;
 /************************************************************/
 /* Classes */
 /************************************************************/
+class Train extends Type_de_case {
+	static train						= new Train('train', 0);
+	static train2						= new Train('train2', 1);
+	static train3						= new Train('train3',2);
+	static train4						= new Train('train4',3);
+	static wagon						= new Train('wagon', 0);
+    constructor(nom, wagons) {
+        super(nom);
+        this.wagons = wagons;
+    }
+}
 
 /*------------------------------------------------------------*/
 // Plateau
@@ -145,9 +168,14 @@ function image_of_case(type_de_case){
 		case Type_de_case.Rail_haut_vers_droite	: return IMAGE_RAIL_HAUT_VERS_DROITE;
 		case Type_de_case.Rail_droite_vers_bas	: return IMAGE_RAIL_DROITE_VERS_BAS;
 		case Type_de_case.Rail_bas_vers_droite	: return IMAGE_RAIL_BAS_VERS_DROITE;
+		case Train.train						: return IMAGE_LOCO;
+		case Train.train2						: return IMAGE_LOCO;
+		case Train.train3						: return IMAGE_LOCO;
+		case Train.train4						: return IMAGE_LOCO;
+		case Train.wagon						: return IMAGE_WAGON;
+		
     }
 }
-
 
 function dessine_case(contexte, plateau, x, y) {
     const la_case = plateau.cases[x][y];
@@ -308,7 +336,8 @@ function tchou(){
 	document.querySelectorAll('button').forEach(button => {
 	button.addEventListener('click', function(event) {
 		// Récupérer le type de case associé au bouton
-		const typeDeCase = handleButtonClick(event);
+		 type_de_case = handleButtonClick(event);
+
 
 		// Désactiver le dernier bouton cliqué s'il existe
 		if (dernierBoutonClique) {
@@ -323,7 +352,8 @@ function tchou(){
 
 		// Attacher l'événement pour récupérer les coordonnées de la case
 		canva.addEventListener('click', function(event) {
-			recuperer_case(event, contexte, plateau, typeDeCase);
+			recuperer_case(event, contexte, plateau);
+			console.log(type_de_case);
 		});
 	});
 });
@@ -334,7 +364,7 @@ function tchou(){
 	
 const canva = document.getElementById('simulateur');
 
-const correspondances = {
+const correspondances= {
     bouton_foret: Type_de_case.Foret,
     bouton_eau: Type_de_case.Eau,
     bouton_rail_horizontal: Type_de_case.Rail_horizontal,
@@ -343,10 +373,11 @@ const correspondances = {
     bouton_rail_haut_vers_droite: Type_de_case.Rail_haut_vers_droite,
     bouton_rail_droite_vers_bas: Type_de_case.Rail_droite_vers_bas,
     bouton_rail_bas_vers_droite: Type_de_case.Rail_bas_vers_droite,
-    bouton_train_1: Type_de_case.Train_1,
-    bouton_train_2: Type_de_case.Train_2,
-    bouton_train_4: Type_de_case.Train_4,
-    bouton_train_6: Type_de_case.Train_6
+    bouton_train_1: Train.train,
+    bouton_train_2: Train.train2,
+	bouton_train_4: Train.train3,
+	bouton_train_6: Train.train4,
+
 };
 
 // recupère l'id du bouton cliqué et retourne le type de case associé
@@ -356,16 +387,83 @@ function handleButtonClick(event) {
         type_de_case = correspondances[buttonId];
         dernierBoutonClique = type_de_case; // Update last clicked button type
         console.log("Last button clicked:", dernierBoutonClique); // Optional: log the last clicked type
-    }
+		 return dernierBoutonClique;
+	}
 }
+
+function creer_train(contexte, plateau, x, y, type_de_case) {
+
+	if(type_de_case === Train.train){
+	if(plateau.cases[x][y] != Type_de_case.Rail_horizontal){
+	alert("Impossible de créer un train ici");
+	return;
+	}
+	else{
+	dessine_case2(contexte, plateau, x, y, Train.train);
+	return;
+	}
+	
+	}
+	if(type_de_case === Train.train2 ){
+	if(x-1<0 || plateau.cases[x][y] != Type_de_case.Rail_horizontal || plateau.cases[x-1][y] != Type_de_case.Rail_horizontal){
+	alert("Impossible de créer un train ici")
+	return;
+	}
+	else{
+	dessine_case2(contexte, plateau, x, y, Train.train);
+	dessine_case2(contexte, plateau, x - 1, y, Train.wagon);
+	return;}
+	}
+	
+	if(type_de_case === Train.train3){
+	if(x-3<0 || plateau.cases[x][y] != Type_de_case.Rail_horizontal
+	|| plateau.cases[x-1][y] != Type_de_case.Rail_horizontal
+	|| plateau.cases[x-2][y] != Type_de_case.Rail_horizontal
+	|| plateau.cases[x-3][y] != Type_de_case.Rail_horizontal){
+	alert("Impossible de créer un train ici");
+	return;
+	}
+	else{
+	dessine_case2(contexte, plateau, x, y, Train.train);
+	dessine_case2(contexte, plateau, x - 1, y, Train.wagon);
+	dessine_case2(contexte, plateau, x - 2, y, Train.wagon);
+	dessine_case2(contexte, plateau, x - 3, y, Train.wagon);
+	return;
+	}
+	}
+	if(type_de_case === Train.train4){
+	if(x-5<0 || plateau.cases[x][y] != Type_de_case.Rail_horizontal
+	|| plateau.cases[x-1][y] != Type_de_case.Rail_horizontal
+	|| plateau.cases[x-2][y] != Type_de_case.Rail_horizontal
+	|| plateau.cases[x-3][y] != Type_de_case.Rail_horizontal
+	|| plateau.cases[x-4][y] != Type_de_case.Rail_horizontal
+	|| plateau.cases[x-5][y] != Type_de_case.Rail_horizontal){
+	alert("Impossible de créer un train ici");
+	return;
+	}
+	else{
+	dessine_case2(contexte, plateau, x, y, Train.train);
+	dessine_case2(contexte, plateau, x - 1, y, Train.wagon);
+	dessine_case2(contexte, plateau, x - 2, y, Train.wagon);
+	dessine_case2(contexte, plateau, x - 3, y, Train.wagon);
+	dessine_case2(contexte, plateau, x - 4, y, Train.wagon);
+	dessine_case2(contexte, plateau, x - 5, y, Train.wagon);
+	return;
+		}
+	}
+	
+}
+	
 
 function recuperer_case(event, contexte, plateau) {
     const x = Math.floor(event.offsetX / LARGEUR_CASE);
     const y = Math.floor(event.offsetY / HAUTEUR_CASE);
-    dessine_case2(contexte, plateau, x, y, dernierBoutonClique); // Use the last clicked button type here
-
+	creer_train(contexte, plateau, x, y, dernierBoutonClique);
+    if(!(type_de_case instanceof Train)){
+		dessine_case2(contexte, plateau, x, y, dernierBoutonClique); // Use the last clicked button type here
+	}
     canva.removeEventListener('click', recuperer_case);
-}
+	}
 
 function dessine_case2(contexte, plateau, x, y, type_de_case) {
     // Check if the type of case is a rail
@@ -382,6 +480,7 @@ function dessine_case2(contexte, plateau, x, y, type_de_case) {
 
     // Get the image associated with the type of tile
     let image_a_afficher = image_of_case(type_de_case);
+	console.log(image_a_afficher);
     
     // Draw the image over the background (grey or transparent)
     contexte.drawImage(image_a_afficher, x * LARGEUR_CASE, y * HAUTEUR_CASE, LARGEUR_CASE, HAUTEUR_CASE);
