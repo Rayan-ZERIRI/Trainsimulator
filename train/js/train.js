@@ -1,4 +1,4 @@
-	/************************************************************/
+ 	/************************************************************/
 	/**
 	 * Université Sorbonne Paris Nord, Programmation Web
 	 * Auteurs                       : Étienne André
@@ -52,7 +52,9 @@
 		static Rail_bas_vers_droite		= new Type_de_case('rail bas vers droite');
 
 		static loco = new Type_de_case('locomotive');
-
+		static loco1 = new Type_de_case('locomotive1');
+		static loco3 = new Type_de_case('locomotive3');
+		static loco5 = new Type_de_case('locomotive5');
 		static wagon = new Type_de_case('wagon');
 
 		constructor(nom) {
@@ -125,9 +127,9 @@
 	/* Classes */
 	/************************************************************/
 	class Train {
-		constructor(loc,wag1,wag2,wag3,wag4,wag5) {
-			this.tab=new Array(6);
-			this.tab=[loc,wag1,wag2,wag3,wag4,wag5];
+		constructor(dir,loc,wag1,wag2,wag3,wag4,wag5) {
+			this.tab=new Array(7);
+			this.tab=[dir,loc,wag1,wag2,wag3,wag4,wag5];
 			for(let i=this.tab.length - 1;i>=0;i--){
 				if(this.tab[i]==undefined)
 				this.tab.pop();
@@ -179,6 +181,9 @@
 		case Type_de_case.Rail_droite_vers_bas	: return IMAGE_RAIL_DROITE_VERS_BAS;
 		case Type_de_case.Rail_bas_vers_droite	: return IMAGE_RAIL_BAS_VERS_DROITE;
 		case Type_de_case.loco					: return IMAGE_LOCO;
+		case Type_de_case.loco1					: return IMAGE_LOCO;
+		case Type_de_case.loco3					: return IMAGE_LOCO;
+		case Type_de_case.loco5					: return IMAGE_LOCO;
 		case Type_de_case.wagon					: return IMAGE_WAGON;
 		
 	}
@@ -398,18 +403,18 @@
 				return;
 			}
 			else{
-				console.log(Type_de_case.loco);
-			clone.cases[x][y]=Type_de_case.loco;
-			all.push(new Train([x,y]));
-			console.log(all[p].tab);
-			console.log(clone.cases[x][y]);
-			p++;
-			dessine_case2(contexte, plateau, x, y, Type_de_case.loco);
+				console.log( Type_de_case.loco);
+				clone.cases[x][y]=Type_de_case.loco;
+				all.push(new Train(0,[x,y]));
+				console.log(all[p].tab);
+				console.log(clone.cases[x][y]);
+				p++;
+				dessine_case(contexte, clone, x, y);
 				return;
 			}
 
 		}
-		if(type_de_case === Type_de_case.loco2 ){
+		if(type_de_case === Type_de_case.loco1 ){
 			if(x-1<0 || plateau.cases[x][y] != Type_de_case.Rail_horizontal || plateau.cases[x-1][y] != Type_de_case.Rail_horizontal){
 				alert("Impossible de créer un train ici")
 				return;
@@ -443,7 +448,7 @@
 				return;
 				}
 		}
-		if(type_de_case === Type_de_case.loco4){
+		if(type_de_case === Type_de_case.loco5){
 			if(x-5<0 || plateau.cases[x][y] != Type_de_case.Rail_horizontal
 			|| plateau.cases[x-1][y] != Type_de_case.Rail_horizontal
 			|| plateau.cases[x-2][y] != Type_de_case.Rail_horizontal
@@ -474,64 +479,109 @@
 
 	// Fonction pour avancer les trains
 	function avancerTrains(plateau, contexte) {
-		window.addEventListener('keydown',function(event){
+		
+			console.log('espace');
 			//parcours du tablo de trains
 			all.forEach(element => {
-				for(let i=0;i<element.length;i++){
-					let train=element;
-					let x=train.tab[i][0];
-					let y=train.tab[i][1];
+	
+				for (let i = 1; i < element.tab.length; i++) {
+					let train = element;
+					let x = 0; 
+					x = train.tab[i][0];
+					console.log(x);
+					let y = train.tab[i][1];
+					console.log(y);
 					let railActuelle = plateau.cases[x][y];
 	
 					let deplacementX = 0;
 					let deplacementY = 0;
-					console.log('railActuelle.nom:', railActuelle.nom);
 	
-					// Check if the current case contains a rail
+	
+					// Check if the current case contains a rail    
 					if (railActuelle.nom.includes('rail')) {
-						console.log(x)
+						let premierrail = true;
 						// Determine the movement based on the type of rail
 						if (railActuelle === Type_de_case.Rail_horizontal) {
-							deplacementX = 1;
+							if(train.tab[0]==0)
+								deplacementX = 1;
+							else{
+								deplacementX = -1;
+							}
 						} else if (railActuelle === Type_de_case.Rail_vertical) {
-							deplacementY = 1;
+							if(train.tab[0]==0)
+								deplacementY = 1;
+							else{
+								deplacementY = -1;
+							}
 						} else if (railActuelle === Type_de_case.Rail_droite_vers_haut) {
-							deplacementX = 1;
-							deplacementY = -1;
+							if(premierrail==true){
+								deplacementY = -1;
+								train.tab[0]=1;
+								premierrail=false;
+							}
+							else{
+								if(train.tab[0]==0){
+									deplacementX = -1;
+									train.tab[0]=1;
+								}
+								else{
+									deplacementY = -1;
+									train.tab[0]=1;
+								}
+							}
+
 						} else if (railActuelle === Type_de_case.Rail_haut_vers_droite) {
-							deplacementX = 1;
-							deplacementY = 1;
+							if(train.tab[0]==0)
+								deplacementY = 1;
+							else{
+								deplacementY = -1;
+							}
 						} else if (railActuelle === Type_de_case.Rail_droite_vers_bas) {
-							deplacementX = 1;
-							deplacementY = 1;
+							if(train.tab[0]==0){
+								deplacementY = 1;
+								train.tab[0]=0;
+							}
+							else{
+								deplacementX = -1;
+								train.tab[0]=1;
+							}
 						} else if (railActuelle === Type_de_case.Rail_bas_vers_droite) {
-							deplacementX = 1;
-							deplacementY = 1;
+							if(train.tab[0]==0)
+								deplacementY = 1;
+							else{
+								deplacementY = -1;
+							}
 						}
 					}
-					updateClone(plateau,x,y,plateau.cases[x][y]);
-					dessine_case(contexte, clone,x, y);
-					x+=deplacementX;
-					y+=deplacementY;
-					train.tab[i][0] = x;
-					train.tab[i][1] = y;
-					updateClone(plateau,x,y,Type_de_case.loco);
-					dessine_case(contexte, clone,x, y);
-				}	
+					let px = 0;
+					px=deplacementX + x;
+					let py = 0;
+					py=deplacementY + y;
+					if(plateau.cases[px][py].nom.includes('rail')){
+					console.log('salut');
+					console.log(px + ' : '+ py)
+					train.tab[i][0] = px;
+					train.tab[i][1] = py;
+					updateClone(plateau, x, y, plateau.cases[x][y]);
+					dessine_case(contexte, clone, x, y);
+					updateClone(plateau, px, py, Type_de_case.loco);
+					console.log(clone.cases[x][y]);
+					dessine_case(contexte, clone, px, py);
+					}
+				}
 			});
-			
-		// Update the plateau after moving the trains
-			
-			setTimeout(function() {
-				avancerTrains(plateau, contexte)
-			},1000);
-			
+	
+			// Update the plateau after moving the trains
+	
+			setTimeout(function () {
+				avancerTrains(plateau, contexte);
+			}, 1000);
+	
 			// Actualiser le plateau après avoir fait avancer les trains
-		
-	});
+	
 
-}
-
+	}
+	
 
 
 	function setUpButtonClickEvents(contexte, plateau) {
@@ -595,36 +645,16 @@
 		creer_train(contexte, plateau,clone, x, y, dernierBoutonClique);
 
 		// Check if the last clicked button type is not a train
-		if (!(dernierBoutonClique instanceof Train)) {
+		if ((dernierBoutonClique.nom !== 'locomotive' ) && (dernierBoutonClique.nom != 'wagon')) {
 			// Update the clone with the last clicked button type at coordinates x and y 
 			// Redraw the updated case
+			
 			plateau.cases[x][y]=type_de_case;
-			dessine_case2(contexte, plateau, x, y, dernierBoutonClique);
+			dessine_case(contexte, plateau, x, y);
 		}
 
 		canva.removeEventListener('click', recuperer_case);
 	}
-
-
-	function dessine_case2(contexte, plateau, x, y, type_de_case) {
-		// Check if the type of case is a rail
-		if (type_de_case === Type_de_case.Rail_horizontal ||
-			type_de_case === Type_de_case.Rail_vertical ||
-			type_de_case === Type_de_case.Rail_droite_vers_haut ||
-			type_de_case === Type_de_case.Rail_haut_vers_droite ||
-			type_de_case === Type_de_case.Rail_droite_vers_bas ||
-			type_de_case === Type_de_case.Rail_bas_vers_droite) {
-			// Set a grey background for the rail tile
-			contexte.fillStyle = 'grey'; // A shade of grey
-			contexte.fillRect(x * LARGEUR_CASE, y * HAUTEUR_CASE, LARGEUR_CASE, HAUTEUR_CASE);
-		}
-
-		// Get the image associated with the type of tile
-		let image_a_afficher = image_of_case(type_de_case);
-		// Draw the image over the background (grey or transparent)
-		contexte.drawImage(image_a_afficher, x * LARGEUR_CASE, y * HAUTEUR_CASE, LARGEUR_CASE, HAUTEUR_CASE);
-	}
-
 
 
 
