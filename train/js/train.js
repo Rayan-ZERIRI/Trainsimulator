@@ -119,7 +119,6 @@
 	/************************************************************/
 	let dernierBoutonClique = null;
 	let type_de_case;
-	let globalX, globalY;
 	let clone;
 	let plateau;
 	let all=new Array();
@@ -402,35 +401,49 @@
 		actif = !actif;
 		if(actif)
 			avancerTrains(plateau, contexte);
+	});
+	canva.addEventListener('click', function(event){
+		changer_direction(contexte, plateau, clone, 12, 10);
 	})
 }
 
-	function setUpButtonClickEvents(contexte, plateau) {
-		let dernierBoutonClique = null; // Stocke une référence vers le dernier bouton cliqué
+let disabled = false;
 
-		document.querySelectorAll('button:not(#bouton_pause').forEach(button => {
-			button.addEventListener('click', function(event) {
-				// Récupérer le type de case associé au bouton
-				type_de_case = handleButtonClick(event);
+function setUpButtonClickEvents(contexte, plateau) {
+    
+    document.querySelectorAll('button:not(#bouton_pause)').forEach(button => {
+        button.addEventListener('click', function (event) {
+            if (disabled) {
+                console.log(disabled);
+                
+                type_de_case = null;
+                console.log(type_de_case);
+                event.target.style.backgroundColor = '';
+                disabled = false;
+                canva.removeEventListener('click', recuperer_case);
+            } else {
+                console.log(disabled);
+                // Récupérer le type de case associé au bouton
+                type_de_case = handleButtonClick(event);
 
-				// Désactiver le dernier bouton cliqué s'il existe
-				if (dernierBoutonClique) {
-					dernierBoutonClique.disabled = false; // Réactiver le dernier bouton cliqué
-				}
+                // Désactiver le dernier bouton cliqué s'il existe
+               
+                    event.target.style.backgroundColor = ''; // Réinitialiser la couleur de fond du dernier bouton
 
-				// Désactiver le bouton actuel
-				event.target.disabled = true;
+                // Activer le bouton actuel
+                event.target.style.backgroundColor = 'grey';
 
-				// Stocker une référence vers le bouton actuel
-				dernierBoutonClique = event.target;
 
-				// Attacher l'événement pour récupérer les coordonnées de la case
-				canva.addEventListener('click', function(event) {
-					recuperer_case(event, contexte, plateau);
-				});
-			});
-		});
-	}
+                // Attacher l'événement pour récupérer les coordonnées de la case
+                canva.addEventListener('click', function (event) {
+                    recuperer_case(event, contexte, plateau);
+                });
+                disabled = true;
+            }
+        });
+    });
+}
+
 
 	function creer_train(contexte, plateau, clone, x, y, type_de_case) {
 
@@ -516,15 +529,15 @@
 	function recuperer_case(event, contexte, plateau) {
 		const x = Math.floor(event.offsetX / LARGEUR_CASE);
 		const y = Math.floor(event.offsetY / HAUTEUR_CASE);
-		if ((dernierBoutonClique.nom.includes('locomotive') )) {
-			creer_train(contexte, plateau,clone, x, y, dernierBoutonClique);
+		if ((type_de_case.nom.includes('locomotive') )) {
+			creer_train(contexte, plateau,clone, x, y, type_de_case);
 		}
 		// Check if the last clicked button type is not a train
-		if ((!dernierBoutonClique.nom.includes('locomotive') )) {
+		if ((!type_de_case.nom.includes('locomotive') )) {
 			// Update the clone with the last clicked button type at coordinates x and y 
 			// Redraw the updated case
-			plateau.cases[x][y]=dernierBoutonClique;
-			console.log(dernierBoutonClique.nom + 'booo');
+			plateau.cases[x][y]=type_de_case;
+			console.log(type_de_case.nom + 'booo');
 			dessine_plateau(contexte, plateau);
 		}
 
@@ -652,11 +665,31 @@
 	
 			setTimeout(function () {
 				avancerTrains(plateau, contexte);
-			},100);
+			},1500);
 	
 			// Actualiser le plateau après avoir fait avancer les trains
 	}
 	
+	function changer_direction(contexte, plateau, clone, x, y) {
+		canva.addEventListener('click', function(event){
+			const x = Math.floor(event.offsetX / LARGEUR_CASE);
+			const y = Math.floor(event.offsetY / HAUTEUR_CASE);
+			if(clone.cases[x][y] === Type_de_case.loco){ 
+				p = all.findIndex(train => train.tab[1][0] == x && train.tab[1][1] == y);
+				let train = all[p];
+				if (train.tab[0] == 0) {
+				train.tab[0] = 1;
+				} else {
+				train.tab[0] = 0;
+				}
+				updateClone(plateau, x, y, clone.cases[x][y]);
+				dessine_case(contexte, clone, x, y);
+			}
+			else{
+				console.log("Impossible de changer la direction ici");
+			}
+		});	
+	}	
 
 
 	
@@ -682,7 +715,7 @@
 	function handleButtonClick(event) {
 		const buttonId = event.target.id;
 		if (buttonId in correspondances) {
-			dernierBoutonClique = correspondances[buttonId]; 
+			let dernierBoutonClique = correspondances[buttonId]; 
 	// Update last clicked button type
 			return dernierBoutonClique;
 		}
