@@ -124,6 +124,7 @@
 	let all=new Array();
 	let p=0;
 	let predX, predY;
+	let disabled = false;
 	// TODO
 
 
@@ -206,6 +207,7 @@
 
 		// Draw the image
 		contexte.drawImage(image_a_afficher, x * LARGEUR_CASE, y * HAUTEUR_CASE, LARGEUR_CASE, HAUTEUR_CASE);
+		console.log("DESSIN")
 	}
 
 
@@ -407,14 +409,12 @@
 	})
 }
 
-let disabled = false;
 
 function setUpButtonClickEvents(contexte, plateau) {
     
     document.querySelectorAll('button:not(#bouton_pause)').forEach(button => {
         button.addEventListener('click', function (event) {
             if (disabled) {
-                console.log(disabled);
                 
                 type_de_case = null;
                 console.log(type_de_case);
@@ -422,11 +422,10 @@ function setUpButtonClickEvents(contexte, plateau) {
                 disabled = false;
                 canva.removeEventListener('click', recuperer_case);
             } else {
-                console.log(disabled);
-                // Récupérer le type de case associé au bouton
+                
                 type_de_case = handleButtonClick(event);
 
-                // Désactiver le dernier bouton cliqué s'il existe
+
                
                     event.target.style.backgroundColor = ''; // Réinitialiser la couleur de fond du dernier bouton
 
