@@ -136,7 +136,7 @@
 	let nbpiece=0;
 	let nbbombe=0;
 	let bouton;
-	// TODO
+	let firstIt = true
 
 
 	/************************************************************/
@@ -162,11 +162,6 @@
 		constructor(){
 			this.largeur = LARGEUR_PLATEAU;
 			this.hauteur = HAUTEUR_PLATEAU;
-
-			// NOTE: à compléter…
-
-			// État des cases du plateau
-			// NOTE: tableau de colonnes, chaque colonne étant elle-même un tableau de cases (beaucoup plus simple à gérer avec la syntaxe case[x][y] pour une coordonnée (x,y))
 			this.cases = [];
 			for (let x = 0; x < this.largeur; x++) {
 				this.cases[x] = [];
@@ -175,9 +170,6 @@
 				}
 			}
 		}
-
-	// NOTE: à compléter…
-
 	}
 
 	class Clone{
@@ -185,11 +177,6 @@
 			constructor(){
 				this.largeur = LARGEUR_PLATEAU;
 				this.hauteur = HAUTEUR_PLATEAU;
-	
-				// NOTE: à compléter…
-	
-				// État des cases du plateau
-				// NOTE: tableau de colonnes, chaque colonne étant elle-même un tableau de cases (beaucoup plus simple à gérer avec la syntaxe case[x][y] pour une coordonnée (x,y))
 				this.cases = [];
 				for (let x = 0; x < this.largeur; x++) {
 					this.cases[x] = [];
@@ -199,7 +186,6 @@
 				}
 			}
 	
-		// NOTE: à compléter…
 	}
 
 
@@ -236,9 +222,7 @@
 			return;
 		}
 
-		// Check if the type of case contains "rail" in its name
 		if (la_case.nom.includes('rail')) {
-			// Change the background color to grey
 			contexte.fillStyle = 'grey';
 			contexte.fillRect(x * LARGEUR_CASE, y * HAUTEUR_CASE, LARGEUR_CASE, HAUTEUR_CASE);
 		}
@@ -249,13 +233,11 @@
 
 
 	function dessine_plateau(page, plateau){
-		// Dessin du plateau avec paysages et rails
 		for (let x = 0; x < plateau.largeur; x++) {
 			for (let y = 0; y < plateau.hauteur; y++) {
 				dessine_case(page, plateau, x, y);
 			}
 		}
-		// NOTE: à compléter…
 	}
 
 
@@ -263,7 +245,104 @@
 	// Auditeurs
 	/************************************************************/
 
-	// TODO
+
+	function setUpButtonClickEvents(contexte, plateau) {
+    
+		document.querySelectorAll('button:not(#bouton_pause)').forEach(button => {
+			button.addEventListener('click', function (event) {
+				if (disabled) {
+					type_de_case = null;
+					console.log(type_de_case);
+				   bouton.style.removeProperty('transform');;
+					disabled = false;
+					canva.removeEventListener('click', recuperer_case);
+				} else {
+					 bouton = event.target;
+					type_de_case = handleButtonClick(event);
+	
+					event.target.style.backgroundColor = ''; // Réinitialiser la couleur de fond du dernier bouton
+	
+					// Activer le bouton actuel
+					event.target.style.setProperty('transform', 'scale(1.3)');
+	
+					// Attacher l'événement pour récupérer les coordonnées de la case
+					canva.addEventListener('click', function (event) {
+						recuperer_case(event, contexte, plateau);
+					});
+					disabled = true;
+	
+				}
+			});
+		});
+	}
+
+	function toggleButtonSize(button) {
+		// Toggle the 'active' class on the button
+		button.classList.toggle('active');
+	}
+	
+	function changer_direction(contexte, plateau, clone, x, y) {
+		canva.addEventListener('click', function(event){
+			const x = Math.floor(event.offsetX / LARGEUR_CASE);
+			const y = Math.floor(event.offsetY / HAUTEUR_CASE);
+			if(clone.cases[x][y] === Type_de_case.loco){ 
+				p = all.findIndex(train => train.tab[1][0] == x && train.tab[1][1] == y);
+				let train = all[p];
+				if (train.tab[0] == 0) {
+				train.tab[0] = 1;
+				} else {
+				train.tab[0] = 0;
+				}
+			}
+			else{
+				console.log("Impossible de changer la direction ici");
+			}
+		});	
+	}	
+
+
+	
+
+
+
+	const correspondances= {
+		bouton_foret: Type_de_case.Foret,
+		bouton_eau: Type_de_case.Eau,
+		bouton_rail_horizontal: Type_de_case.Rail_horizontal,
+		bouton_rail_vertical: Type_de_case.Rail_vertical,
+		bouton_rail_droite_vers_haut: Type_de_case.Rail_droite_vers_haut,
+		bouton_rail_haut_vers_droite: Type_de_case.Rail_haut_vers_droite,
+		bouton_rail_droite_vers_bas: Type_de_case.Rail_droite_vers_bas,
+		bouton_rail_bas_vers_droite: Type_de_case.Rail_bas_vers_droite,
+		bouton_train_1: Type_de_case.loco,
+		bouton_train_2: Type_de_case.loco1,
+		bouton_train_4: Type_de_case.loco3,
+		bouton_train_6: Type_de_case.loco5,
+	};
+
+	function recuperer_case(event, contexte, plateau) {
+		const x = Math.floor(event.offsetX / LARGEUR_CASE);
+		const y = Math.floor(event.offsetY / HAUTEUR_CASE);
+		if ((type_de_case.nom.includes('locomotive') )) {
+			creer_train(contexte, plateau,clone, x, y, type_de_case);
+		}
+		if ((!type_de_case.nom.includes('locomotive') )) {
+			plateau.cases[x][y]=type_de_case;
+			console.log(type_de_case.nom + 'booo');
+			dessine_plateau(contexte, plateau);
+		}
+
+		canva.removeEventListener('click', recuperer_case);
+	}
+	function handleButtonClick(event) {
+		const buttonId = event.target.id;
+		if (buttonId in correspondances) {
+			let dernierBoutonClique = correspondances[buttonId]; 
+			return dernierBoutonClique;
+		}
+	}
+
+	
 
 
 	/************************************************************/
@@ -293,14 +372,14 @@
 		plateau.cases[11][7] = Type_de_case.Rail_bas_vers_droite;
 
 		// Segment isolé à gauche
-		plateau.cases[0][7] = Type_de_case.Rail_horizontal;
-		plateau.cases[1][7] = Type_de_case.Rail_horizontal;
-		plateau.cases[2][7] = Type_de_case.Rail_horizontal;
-		plateau.cases[3][7] = Type_de_case.Rail_horizontal;
-		plateau.cases[4][7] = Type_de_case.Rail_horizontal;
-		plateau.cases[5][7] = Type_de_case.Eau;
-		plateau.cases[6][7] = Type_de_case.Rail_horizontal;
-		plateau.cases[7][7] = Type_de_case.Rail_horizontal;
+		plateau.cases[0][8] = Type_de_case.Rail_horizontal;
+		plateau.cases[1][8] = Type_de_case.Rail_horizontal;
+		plateau.cases[2][8] = Type_de_case.Rail_horizontal;
+		plateau.cases[3][8] = Type_de_case.Rail_horizontal;
+		plateau.cases[4][8] = Type_de_case.Rail_horizontal;
+		plateau.cases[5][8] = Type_de_case.Eau;
+		plateau.cases[6][8] = Type_de_case.Rail_horizontal;
+		plateau.cases[7][8] = Type_de_case.Rail_horizontal;
 
 		// Plan d'eau
 		for(let x = 22; x <= 27; x++){
@@ -487,43 +566,6 @@ function tchou() {
 }
 
 
-
-function setUpButtonClickEvents(contexte, plateau) {
-    
-    document.querySelectorAll('button:not(#bouton_pause)').forEach(button => {
-        button.addEventListener('click', function (event) {
-            if (disabled) {
-                type_de_case = null;
-                console.log(type_de_case);
-               bouton.style.removeProperty('transform');;
-                disabled = false;
-                canva.removeEventListener('click', recuperer_case);
-            } else {
-				 bouton = event.target;
-                type_de_case = handleButtonClick(event);
-
-                event.target.style.backgroundColor = ''; // Réinitialiser la couleur de fond du dernier bouton
-
-                // Activer le bouton actuel
-                event.target.style.setProperty('transform', 'scale(1.3)');
-
-                // Attacher l'événement pour récupérer les coordonnées de la case
-                canva.addEventListener('click', function (event) {
-                    recuperer_case(event, contexte, plateau);
-                });
-                disabled = true;
-
-            }
-        });
-    });
-}
-
-function toggleButtonSize(button) {
-    // Toggle the 'active' class on the button
-    button.classList.toggle('active');
-}
-
-
 	function creer_train(contexte, plateau, clone, x, y, type_de_case) {
 
 		if(type_de_case === Type_de_case.loco){
@@ -605,8 +647,7 @@ function toggleButtonSize(button) {
 
 	}
 	
-	let firstIt = true
-	// Fonction pour avancer les trains
+
 	function avancerTrains(plateau, contexte) {
 		if(actif === false){
 			return;
@@ -690,145 +731,74 @@ function toggleButtonSize(button) {
 				px=deplacementX + x;
 				let py = 0;
 				py=deplacementY + y;
-				if(px>plateau.largeur || py>plateau.hauteur || px<0 || py<0){
-					for (let i = 1; i < element.tab.length; i++) {
-						updateClone(plateau, x-i*deplacementX, y-i*deplacementY, Type_de_case.vide);
-						//dessine_case(contexte, clone, x, y);
-						all.train.tab.splice(i, 1);
-					}
-				}
-				if(plateau.cases[px][py].nom.includes('rail')){
-					if((railActuel === Type_de_case.Rail_horizontal && plateau.cases[px][py].nom.includes('rail bas') && train.tab[0]==0)
-					|| (railActuel === Type_de_case.Rail_horizontal && plateau.cases[px][py].nom.includes('rail haut') && train.tab[0]==0) 
-					|| (railActuel === Type_de_case.Rail_vertical && (plateau.cases[px][py].nom.includes('rail droite vers haut') || plateau.cases[px][py].nom.includes('rail bas')) && train.tab[0]==1)
-					|| (railActuel === Type_de_case.Rail_vertical && (plateau.cases[px][py].nom.includes('rail droite vers bas') || plateau.cases[px][py].nom.includes('rail haut'))  && train.tab[0]==0)  
-					|| (clone.cases[px][py]=='locomotive') || (clone.cases[px][py]=='wagon')
-					|| (railActuel === Type_de_case.Rail_horizontal && plateau.cases[px][py].nom.includes('rail vertical'))
-					|| (railActuel === Type_de_case.Rail_vertical && plateau.cases[px][py].nom.includes('rail horizontal'))
-					
-					|| (railActuel === Type_de_case.Rail_vertical && plateau.cases[px][py].nom.includes('rail horizontal'))
-					|| (railActuel === Type_de_case.Rail_vertical && plateau.cases[px][py].nom.includes('rail horizontal'))
-					){
+				
+				if(px>=plateau.largeur || py>=plateau.hauteur || px<0 || py<0){
+					for (let i = 1; i < train.tab.length; i++) {
 						updateClone(plateau, x, y, Type_de_case.vide);
+						//dessine_case(contexte, clone, x, y);
 						train.tab.splice(i, 1);
-					}
-					else{
-						if(clone.cases[px][py].nom.includes('piece')){
-							console.log('DOLLARS');
-							updateCounter(1);
-							nbpiece--;
-						}
-						if(clone.cases[px][py].nom.includes('bombe')){
-							console.log('BOOM');
-							updateCounter(-1);
-							nbbombe--;
-						}
-						for (let i = 1; i < element.tab.length; i++) {
-							predX= train.tab[i][0]; 
-							predY= train.tab[i][1];
-							train.tab[i][0] = px-(i-1)*deplacementX;
-							train.tab[i][1] = py-(i-1)*deplacementY;
-							updateClone(plateau, px-(i-1)*deplacementX, py-(i-1)*deplacementY, clone.cases[x-(i-1)*deplacementX][y-(i-1)*deplacementY]);
-							updateClone(plateau, x-(i-1)*deplacementX, y-(i-1)*deplacementY, Type_de_case.vide);
-							if(nbbombe==0)
-								ajouterBombe(plateau,5);
-							if(nbpiece==0)
-								ajouterPiecesOr(plateau,5);
-							console.log(px + " : " + py);
-						}
-						firstIt = false;
 					}
 				}
 				else{
-					for (let i = 1; i < element.tab.length; i++) {
-						updateClone(plateau, x-i*deplacementX, y-i*deplacementY, Type_de_case.vide);
-						//dessine_case(contexte, clone, x, y);
-						all.train.tab.splice(i, 1);
+					if(plateau.cases[px][py].nom.includes('rail')){
+						if((railActuel === Type_de_case.Rail_horizontal && plateau.cases[px][py].nom.includes('rail bas') && train.tab[0]==0)
+						|| (railActuel === Type_de_case.Rail_horizontal && plateau.cases[px][py].nom.includes('rail haut') && train.tab[0]==0) 
+						|| (railActuel === Type_de_case.Rail_vertical && (plateau.cases[px][py].nom.includes('rail droite vers haut') || plateau.cases[px][py].nom.includes('rail bas')) && train.tab[0]==1)
+						|| (railActuel === Type_de_case.Rail_vertical && (plateau.cases[px][py].nom.includes('rail droite vers bas') || plateau.cases[px][py].nom.includes('rail haut'))  && train.tab[0]==0)  
+						|| (clone.cases[px][py]=='locomotive') || (clone.cases[px][py]=='wagon')
+						|| (railActuel === Type_de_case.Rail_horizontal && plateau.cases[px][py].nom.includes('rail vertical'))
+						|| (railActuel === Type_de_case.Rail_vertical && plateau.cases[px][py].nom.includes('rail horizontal'))
+						
+						|| (railActuel === Type_de_case.Rail_vertical && plateau.cases[px][py].nom.includes('rail horizontal'))
+						|| (railActuel === Type_de_case.Rail_vertical && plateau.cases[px][py].nom.includes('rail horizontal'))
+						){
+							updateClone(plateau, x, y, Type_de_case.vide);
+							element.tab.splice(i, 1);
+						}
+						else{
+							if(clone.cases[px][py].nom.includes('piece')){
+								updateCounter(1);
+								nbpiece--;
+							}
+							if(clone.cases[px][py].nom.includes('bombe')){
+								updateCounter(-1);
+								nbbombe--;
+							}
+							for (let i = 1; i < element.tab.length; i++) {
+								predX= train.tab[i][0]; 
+								predY= train.tab[i][1];
+								train.tab[i][0] = px-(i-1)*deplacementX;
+								train.tab[i][1] = py-(i-1)*deplacementY;
+								updateClone(plateau, px-(i-1)*deplacementX, py-(i-1)*deplacementY, clone.cases[x-(i-1)*deplacementX][y-(i-1)*deplacementY]);
+								updateClone(plateau, x-(i-1)*deplacementX, y-(i-1)*deplacementY, Type_de_case.vide);
+								if(nbbombe==0)
+									ajouterBombe(plateau,5);
+								if(nbpiece==0)
+									ajouterPiecesOr(plateau,5);
+								console.log(px + " : " + py);
+							}
+							firstIt = false;
+						}
+					}
+					else{
+						for (let i = 1; i < element.tab.length; i++) {
+							updateClone(plateau, x-i*deplacementX, y-i*deplacementY, Type_de_case.vide);
+							train.tab.splice(i, 1);
+						}
 					}
 				}
 			}
+		
 		});
-	
-		// Update the plateau after moving the trains
+				
 		dessine_plateau(contexte, plateau);
 		dessine_plateau(contexte, clone);
 		setTimeout(function () {
 			avancerTrains(plateau, contexte);
 		},500);
 
-		// Actualiser le plateau après avoir fait avancer les trains
 	}
 	
-	function changer_direction(contexte, plateau, clone, x, y) {
-		canva.addEventListener('click', function(event){
-			const x = Math.floor(event.offsetX / LARGEUR_CASE);
-			const y = Math.floor(event.offsetY / HAUTEUR_CASE);
-			if(clone.cases[x][y] === Type_de_case.loco){ 
-				p = all.findIndex(train => train.tab[1][0] == x && train.tab[1][1] == y);
-				let train = all[p];
-				if (train.tab[0] == 0) {
-				train.tab[0] = 1;
-				} else {
-				train.tab[0] = 0;
-				}
-			}
-			else{
-				console.log("Impossible de changer la direction ici");
-			}
-		});	
-	}	
-
-
-	
-
-
-
-	const correspondances= {
-		bouton_foret: Type_de_case.Foret,
-		bouton_eau: Type_de_case.Eau,
-		bouton_rail_horizontal: Type_de_case.Rail_horizontal,
-		bouton_rail_vertical: Type_de_case.Rail_vertical,
-		bouton_rail_droite_vers_haut: Type_de_case.Rail_droite_vers_haut,
-		bouton_rail_haut_vers_droite: Type_de_case.Rail_haut_vers_droite,
-		bouton_rail_droite_vers_bas: Type_de_case.Rail_droite_vers_bas,
-		bouton_rail_bas_vers_droite: Type_de_case.Rail_bas_vers_droite,
-		bouton_train_1: Type_de_case.loco,
-		bouton_train_2: Type_de_case.loco1,
-		bouton_train_4: Type_de_case.loco3,
-		bouton_train_6: Type_de_case.loco5,
-	};
-
-	function recuperer_case(event, contexte, plateau) {
-		const x = Math.floor(event.offsetX / LARGEUR_CASE);
-		const y = Math.floor(event.offsetY / HAUTEUR_CASE);
-		if ((type_de_case.nom.includes('locomotive') )) {
-			creer_train(contexte, plateau,clone, x, y, type_de_case);
-		}
-		// Check if the last clicked button type is not a train
-		if ((!type_de_case.nom.includes('locomotive') )) {
-			// Update the clone with the last clicked button type at coordinates x and y 
-			// Redraw the updated case
-			plateau.cases[x][y]=type_de_case;
-			console.log(type_de_case.nom + 'booo');
-			dessine_plateau(contexte, plateau);
-		}
-
-		canva.removeEventListener('click', recuperer_case);
-	}
-	// recupère l'id du bouton cliqué et retourne le type de case associé
-	function handleButtonClick(event) {
-		const buttonId = event.target.id;
-		if (buttonId in correspondances) {
-			let dernierBoutonClique = correspondances[buttonId]; 
-	// Update last clicked button type
-			return dernierBoutonClique;
-		}
-	}
-
-	
-
-
-
 
 	/**********************************************************string**/
 	// Programme principal
