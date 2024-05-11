@@ -135,6 +135,7 @@
 	let pause=document.getElementById('bouton_pause');
 	let nbpiece=0;
 	let nbbombe=0;
+	let bouton;
 	// TODO
 
 
@@ -493,24 +494,24 @@ function setUpButtonClickEvents(contexte, plateau) {
             if (disabled) {
                 type_de_case = null;
                 console.log(type_de_case);
-                event.target.style.backgroundColor = '';
+               bouton.style.removeProperty('transform');;
                 disabled = false;
                 canva.removeEventListener('click', recuperer_case);
             } else {
-                
+				 bouton = event.target;
                 type_de_case = handleButtonClick(event);
 
-                    event.target.style.backgroundColor = ''; // Réinitialiser la couleur de fond du dernier bouton
+                event.target.style.backgroundColor = ''; // Réinitialiser la couleur de fond du dernier bouton
 
                 // Activer le bouton actuel
-                event.target.style.backgroundColor = 'grey';
-
+                event.target.style.setProperty('transform', 'scale(1.3)');
 
                 // Attacher l'événement pour récupérer les coordonnées de la case
                 canva.addEventListener('click', function (event) {
                     recuperer_case(event, contexte, plateau);
                 });
                 disabled = true;
+
             }
         });
     });
