@@ -4,6 +4,8 @@
 	 * Auteurs                       : Étienne André
 	 * Création                      : 2023/12/11
 	 * Dernière modification         : 2024/04/02
+  	 * Etudiant                      : Delsuc Florian 12102407
+    					   Zeriri Youcef Rayan   12107613
 	 */
 	/************************************************************/
 
