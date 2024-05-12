@@ -143,8 +143,8 @@
 	/* Classes */
 	/************************************************************/
 	class Train {
-		constructor(dir, loc, dir1, wag1, dir2, wag2, dir3, wag3, dir4, wag4, dir5, wag5) {
-			this.tab = [dir, loc, dir1, wag1, dir2, wag2, dir3, wag3, dir4, wag4, dir5, wag5];
+		constructor(pred, dir, loc, wag1, wag2, wag3, wag4, wag5) {
+			this.tab = [pred, dir, loc, wag1, wag2, wag3, wag4, wag5];
 			// Clean undefined entries from the array
 			for (let i = this.tab.length - 1; i >= 0; i--) {
 				if (this.tab[i] === undefined)
@@ -261,25 +261,16 @@
 
 		document.querySelectorAll('button:not(#bouton_pause)').forEach(button => {
 			button.addEventListener('click', function (event) {
-				console.log("click");
 				if (disabled) {
 					type_de_case = null;
-					console.log(type_de_case);
 				   bouton.style.removeProperty('transform');;
 					disabled = false;
 					canva.removeEventListener('click', recuperer_case);
 				} else {
 					bouton = event.target;
 					type_de_case = handleButtonClick(event);
-	
-					//event.target.style.backgroundColor = ''; // Réinitialiser la couleur de fond du dernier bouton
-	
-					// Activer le bouton actuel
 					event.target.style.setProperty('transform', 'scale(1.3)');
-	
-	
 					disabled = true;
-	
 				}
 			});
 		});
@@ -290,18 +281,17 @@
 	}
 
 	function toggleButtonSize(button) {
-		// Toggle the 'active' class on the button
 		button.classList.toggle('active');
 	}
 	
-	function changer_direction(contexte, plateau, clone, x, y) {
+	function changer_direction(contexte, plateau, clone) {
 		canva.addEventListener('click', function(event){
 			const x = Math.floor(event.offsetX / LARGEUR_CASE);
 			const y = Math.floor(event.offsetY / HAUTEUR_CASE);
-			if(clone.cases[x][y] === Type_de_case.loco){ 
-				p = all.findIndex(train => train.tab[1][0] == x && train.tab[1][1] == y);
+			if(clone.cases[x][y] === Type_de_case.loco && type_de_case === null){ 
+				p = all.findIndex(train => train.tab[2][0] == x && train.tab[2][1] == y);
 				let train = all[p];
-				for(let i=0;i<train.tab.length;i+=2){
+				for(let i=1;i<train.tab.length;i+=2){
 					if (train.tab[i] == 0) {
 						train.tab[i] = 1;
 					} 
@@ -315,11 +305,6 @@
 			}
 		});	
 	}	
-
-
-	
-
-
 
 	const correspondances= {
 		bouton_foret: Type_de_case.Foret,
@@ -561,9 +546,10 @@ function tchou() {
 		if(actif)
 			avancerTrains(plateau, contexte);
 	});
-	/*canva.addEventListener('click', function(event){
-		changer_direction(contexte, plateau, clone, 12, 10);
-	})*/
+	canva.addEventListener('click', ()=> {
+		changer_direction(contexte, plateau, clone);
+	});
+		
 }
 
 
@@ -576,7 +562,7 @@ function tchou() {
 			}
 			else{
 				clone.cases[x][y]=Type_de_case.loco;
-				all.push(new Train(0,[x,y]));
+				all.push(new Train(true,0,[x,y]));
 				console.log(all);
 				dessine_case(contexte, clone, x, y);
 				return;
@@ -591,7 +577,7 @@ function tchou() {
 			else{
 				clone.cases[x][y]=Type_de_case.loco;
 				clone.cases[x-1][y]=Type_de_case.wagon;
-				all.push(new Train(0,[x,y],0,[x-1,y]));
+				all.push(new Train(true, 0,[x,y],0,[x-1,y]));
 				dessine_case(contexte, clone, x, y);
 				dessine_case(contexte, clone, x-1, y);
 				return;
@@ -611,7 +597,7 @@ function tchou() {
 				clone.cases[x-1][y]=Type_de_case.wagon;
 				clone.cases[x-2][y]=Type_de_case.wagon;
 				clone.cases[x-3][y]=Type_de_case.wagon;
-				all.push(new Train(0,[x,y],0,[x-1,y],0,[x-2,y],0,[x-3,y]));
+				all.push(new Train(true, 0,[x,y],0,[x-1,y],0,[x-2,y],0,[x-3,y]));
 				dessine_case(contexte, clone, x, y);
 				dessine_case(contexte, clone, x-1, y);
 				dessine_case(contexte, clone, x-2, y);
@@ -636,7 +622,7 @@ function tchou() {
 				clone.cases[x-3][y]=Type_de_case.wagon;
 				clone.cases[x-4][y]=Type_de_case.wagon;
 				clone.cases[x-5][y]=Type_de_case.wagon;
-				all.push(new Train(0,[x,y],0,[x-1,y],0,[x-2,y],0,[x-3,y],0,[x-4,y],0,[x-5,y]));
+				all.push(new Train(true, 0,[x,y],0,[x-1,y],0,[x-2,y],0,[x-3,y],0,[x-4,y],0,[x-5,y]));
 				dessine_case(contexte, clone, x, y);
 				dessine_case(contexte, clone, x-1, y);
 				dessine_case(contexte, clone, x-2, y);
@@ -662,9 +648,9 @@ function tchou() {
 			let train = all[index];
 
 	
-			let x = train.tab[1][0];
-			let y = train.tab[1][1];
-			if (firstIt === false){
+			let x = train.tab[2][0];
+			let y = train.tab[2][1];
+			if (train.tab[0] === true){
 				predX = x; 
 				predY = y; 
 			}
@@ -680,13 +666,13 @@ function tchou() {
 				// Determine the movement based on the type of rail
 				switch (railActuel) {
 					case Type_de_case.Rail_horizontal:
-						if (train.tab[0] == 0)
+						if (train.tab[1] == 0)
 							deplacementX = 1;
 						else
 							deplacementX = -1;
 						break;
 					case Type_de_case.Rail_vertical:
-						if (train.tab[0] == 0)
+						if (train.tab[1] == 0)
 							deplacementY = 1;
 						else
 							deplacementY = -1;
@@ -694,37 +680,37 @@ function tchou() {
 					case Type_de_case.Rail_droite_vers_haut:
 						if (railprecedent == Type_de_case.Rail_horizontal) {
 							deplacementY = -1;
-							train.tab[0] = 1;
+							train.tab[1] = 1;
 						} else {
 							deplacementX = -1;
-							train.tab[0] = 1;
+							train.tab[1] = 1;
 						}
 						break;
 					case Type_de_case.Rail_haut_vers_droite:
 						if (railprecedent == Type_de_case.Rail_horizontal) {
 							deplacementY = 1;
-							train.tab[0] = 0;
+							train.tab[1] = 0;
 						} else {
 							deplacementX = 1;
-							train.tab[0] = 0;
+							train.tab[1] = 0;
 						}
 						break;
 					case Type_de_case.Rail_droite_vers_bas:
 						if (railprecedent == Type_de_case.Rail_horizontal) {
 							deplacementY = 1;
-							train.tab[0] = 0;
+							train.tab[1] = 0;
 						} else {
 							deplacementX = -1;
-							train.tab[0] = 1;
+							train.tab[1] = 1;
 						}
 						break;
 					case Type_de_case.Rail_bas_vers_droite:
 						if (railprecedent == Type_de_case.Rail_horizontal) {
 							deplacementY = -1;
-							train.tab[0] = 1;
+							train.tab[1] = 1;
 						} else {
 							deplacementX = 1;
-							train.tab[0] = 0;
+							train.tab[1] = 0;
 						}
 						break;
 					default:
@@ -737,24 +723,24 @@ function tchou() {
 				py=deplacementY + y;
 				
 				if(px>=plateau.largeur || py>=plateau.hauteur || px<0 || py<0){
-					for(i=1;i<train.tab.length;i+=2)
-						updateClone(plateau, train.tab[i][0], train.tab[i][1], Type_de_case.vide);
+					for(i=2;i<train.tab.length;i+=2)
+						updateClone(plateau, train.tab[2][0], train.tab[2][1], Type_de_case.vide);
 					all.splice(index, 1);
 				}
 				else{
 					if(plateau.cases[px][py].nom.includes('rail')){
-						if((railActuel === Type_de_case.Rail_horizontal && plateau.cases[px][py].nom.includes('rail bas') && train.tab[0]==0)
-						|| (railActuel === Type_de_case.Rail_horizontal && plateau.cases[px][py].nom.includes('rail haut') && train.tab[0]==0) 
-						|| (railActuel === Type_de_case.Rail_vertical && (plateau.cases[px][py].nom.includes('rail droite vers haut') || plateau.cases[px][py].nom.includes('rail bas')) && train.tab[0]==1)
-						|| (railActuel === Type_de_case.Rail_vertical && (plateau.cases[px][py].nom.includes('rail droite vers bas') || plateau.cases[px][py].nom.includes('rail haut'))  && train.tab[0]==0)  
+						if((railActuel === Type_de_case.Rail_horizontal && plateau.cases[px][py].nom.includes('rail bas') && train.tab[1]==0)
+						|| (railActuel === Type_de_case.Rail_horizontal && plateau.cases[px][py].nom.includes('rail haut') && train.tab[1]==0) 
+						|| (railActuel === Type_de_case.Rail_vertical && (plateau.cases[px][py].nom.includes('rail droite vers haut') || plateau.cases[px][py].nom.includes('rail bas')) && train.tab[1]==1)
+						|| (railActuel === Type_de_case.Rail_vertical && (plateau.cases[px][py].nom.includes('rail droite vers bas') || plateau.cases[px][py].nom.includes('rail haut'))  && train.tab[1]==0)  
 						|| (railActuel === Type_de_case.Rail_horizontal && plateau.cases[px][py].nom.includes('rail vertical'))
 						|| (railActuel === Type_de_case.Rail_vertical && plateau.cases[px][py].nom.includes('rail horizontal'))	
 						|| (railActuel === Type_de_case.Rail_vertical && plateau.cases[px][py].nom.includes('rail horizontal'))
 						|| (railActuel === Type_de_case.Rail_vertical && plateau.cases[px][py].nom.includes('rail horizontal'))
 						|| clone.cases[px][py].nom.includes('loc') || clone.cases[px][py].nom.includes('wagon')
 						){
-							for(let i=1;i<train.tab.length;i+=2)
-								updateClone(plateau, train.tab[i][0], train.tab[i][1], Type_de_case.vide);
+							for(let i=2;i<train.tab.length;i+=2)
+								updateClone(plateau, train.tab[2][0], train.tab[2][1], Type_de_case.vide);
 							all.splice(index, 1);
 						}
 						else{
@@ -767,31 +753,31 @@ function tchou() {
 								nbbombe--;
 							}
 							
-							predX= train.tab[1][0]; 
-							predY= train.tab[1][1];
-							for(let i=3;i<train.tab.length;i+=2){
+							predX= train.tab[2][0]; 
+							predY= train.tab[2][1];
+							for(let i=4;i<train.tab.length;i+=2){
 								updateClone(plateau, train.tab[i][0], train.tab[i][1], Type_de_case.vide);
 								train.tab[i][0]=train.tab[i-2][0];
 								train.tab[i][1]=train.tab[i-2][1];
 								updateClone(plateau, train.tab[i][0], train.tab[i][1], Type_de_case.wagon);
 								console.log('avant'+train.tab[i][0] + " : " + train.tab[i][1]);
 							}
-							train.tab[1][0] = px;
-							train.tab[1][1] = py;
-							console.log('apres'+train.tab[1][0] + " : " + train.tab[1][1]);
+							train.tab[2][0] = px;
+							train.tab[2][1] = py;
+							console.log('apres'+train.tab[2][0] + " : " + train.tab[2][1]);
 							updateClone(plateau, px, py, Type_de_case.loco);
-							if(train.tab.length<3)
+							if(train.tab.length<4)
 								updateClone(plateau, x, y, Type_de_case.vide);
 							if(nbbombe==0)
 								ajouterBombe(plateau,5);
 							if(nbpiece==0)
 								ajouterPiecesOr(plateau,5);
 						
-							firstIt=true;
+							train.tab[0]= false;
 						}
 					}
 					else{
-						for(let i=1;i<train.tab.length;i+=2)
+						for(let i=2;i<train.tab.length;i+=2)
 							updateClone(plateau, train.tab[i][0], train.tab[i][1], Type_de_case.vide);
 						all.splice(index, 1);
 					}
