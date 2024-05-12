@@ -655,11 +655,11 @@ function tchou() {
 			return;
 		}
 		
-		all.forEach(element => {
+		for (let index = all.length - 1; index >= 0; index--) {
 
 			
 			
-			let train = element;
+			let train = all[index];
 
 	
 			let x = train.tab[1][0];
@@ -738,8 +738,8 @@ function tchou() {
 				
 				if(px>=plateau.largeur || py>=plateau.hauteur || px<0 || py<0){
 					for(i=1;i<train.tab.length;i+=2)
-							updateClone(plateau, train.tab[i][0], train.tab[i][1], Type_de_case.vide);
-						element.tab.splice(i);
+						updateClone(plateau, train.tab[i][0], train.tab[i][1], Type_de_case.vide);
+					all.splice(index, 1);
 				}
 				else{
 					if(plateau.cases[px][py].nom.includes('rail')){
@@ -747,16 +747,15 @@ function tchou() {
 						|| (railActuel === Type_de_case.Rail_horizontal && plateau.cases[px][py].nom.includes('rail haut') && train.tab[0]==0) 
 						|| (railActuel === Type_de_case.Rail_vertical && (plateau.cases[px][py].nom.includes('rail droite vers haut') || plateau.cases[px][py].nom.includes('rail bas')) && train.tab[0]==1)
 						|| (railActuel === Type_de_case.Rail_vertical && (plateau.cases[px][py].nom.includes('rail droite vers bas') || plateau.cases[px][py].nom.includes('rail haut'))  && train.tab[0]==0)  
-						|| (clone.cases[px][py]=='locomotive') || (clone.cases[px][py]=='wagon')
 						|| (railActuel === Type_de_case.Rail_horizontal && plateau.cases[px][py].nom.includes('rail vertical'))
+						|| (railActuel === Type_de_case.Rail_vertical && plateau.cases[px][py].nom.includes('rail horizontal'))	
 						|| (railActuel === Type_de_case.Rail_vertical && plateau.cases[px][py].nom.includes('rail horizontal'))
-						
 						|| (railActuel === Type_de_case.Rail_vertical && plateau.cases[px][py].nom.includes('rail horizontal'))
-						|| (railActuel === Type_de_case.Rail_vertical && plateau.cases[px][py].nom.includes('rail horizontal'))
+						|| clone.cases[px][py].nom.includes('loc') || clone.cases[px][py].nom.includes('wagon')
 						){
 							for(let i=1;i<train.tab.length;i+=2)
 								updateClone(plateau, train.tab[i][0], train.tab[i][1], Type_de_case.vide);
-							element.tab.splice(i);
+							all.splice(index, 1);
 						}
 						else{
 							if(clone.cases[px][py].nom.includes('piece')){
@@ -775,16 +774,18 @@ function tchou() {
 								train.tab[i][0]=train.tab[i-2][0];
 								train.tab[i][1]=train.tab[i-2][1];
 								updateClone(plateau, train.tab[i][0], train.tab[i][1], Type_de_case.wagon);
+								console.log('avant'+train.tab[i][0] + " : " + train.tab[i][1]);
 							}
 							train.tab[1][0] = px;
 							train.tab[1][1] = py;
+							console.log('apres'+train.tab[1][0] + " : " + train.tab[1][1]);
 							updateClone(plateau, px, py, Type_de_case.loco);
-							updateClone(plateau, x, y, Type_de_case.vide);
+							if(train.tab.length<3)
+								updateClone(plateau, x, y, Type_de_case.vide);
 							if(nbbombe==0)
 								ajouterBombe(plateau,5);
 							if(nbpiece==0)
 								ajouterPiecesOr(plateau,5);
-							console.log(px + " : " + py);
 						
 							firstIt=true;
 						}
@@ -792,14 +793,14 @@ function tchou() {
 					else{
 						for(let i=1;i<train.tab.length;i+=2)
 							updateClone(plateau, train.tab[i][0], train.tab[i][1], Type_de_case.vide);
-						element.tab.splice(i);
+						all.splice(index, 1);
 					}
 				}
 			}
 		
 			
 		
-		});
+		}
 				
 		dessine_plateau(contexte, plateau);
 		dessine_plateau(contexte, clone);
