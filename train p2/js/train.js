@@ -634,7 +634,7 @@ function tchou() {
 			let railprecedent = plateau.cases[train.tab[0][0]][train.tab[0][1]];
 			let deplacementX = 0;
 			let deplacementY = 0;
-
+			console.log(all);
 		
 			if (railActuel.nom.includes('rail')) {
 				switch (railActuel) {
@@ -707,34 +707,37 @@ function tchou() {
 						|| (railActuel === Type_de_case.Rail_vertical && (plateau.cases[px][py].nom.includes('rail droite vers bas') || plateau.cases[px][py].nom.includes('rail haut'))  && train.tab[1]==0)  
 						|| (railActuel === Type_de_case.Rail_horizontal && plateau.cases[px][py].nom.includes('rail vertical'))
 						|| (railActuel === Type_de_case.Rail_vertical && plateau.cases[px][py].nom.includes('rail horizontal'))	
-						|| (railActuel === Type_de_case.Rail_vertical && plateau.cases[px][py].nom.includes('rail horizontal'))
-						|| (railActuel === Type_de_case.Rail_vertical && plateau.cases[px][py].nom.includes('rail horizontal'))
-						){
+						|| (railActuel.nom.includes('droite') && plateau.cases[px][py].nom.includes('rail horizontal') && railprecedent==Type_de_case.Rail_horizontal)	
+						|| (railActuel.nom.includes('droite') && plateau.cases[px][py].nom.includes('rail vertical') && railprecedent==Type_de_case.Rail_vertical)	
+						|| ((railActuel.nom.includes('bas') || railActuel.nom.includes('haut')) && plateau.cases[px][py].nom.includes('rail horizontal') && railprecedent==Type_de_case.Rail_horizontal)
+						|| ((railActuel.nom.includes('bas') || railActuel.nom.includes('haut')) && plateau.cases[px][py].nom.includes('rail vertical') && railprecedent==Type_de_case.Rail_vertical))
+						{
 							for(let i=2;i<train.tab.length;i++)
 								updateClone(plateau, train.tab[i][0], train.tab[i][1], Type_de_case.vide);
 							all.splice(index, 1);
 						}
 						else if (clone.cases[px][py].nom.includes('loc') || clone.cases[px][py].nom.includes('wagon')) {
-							let destructIndex = all.findIndex(train => 
-								train.tab.slice(2).some(coord => coord[0] === px && coord[1] === py)
-							);
+								let destructIndex = all.findIndex(train => 
+									train.tab.slice(2).some(coord => coord[0] === px && coord[1] === py)
+								);
 						
-							// If a collided train is found
-							if (destructIndex !== -1) {
-								// Update the board to clear all positions of the collided train
-								const collidedTrain = all[destructIndex];
-								for (let i = 2; i < collidedTrain.tab.length; i++) {
-									updateClone(plateau, collidedTrain.tab[i][0], collidedTrain.tab[i][1], Type_de_case.vide);
+								if (destructIndex !== -1) {
+									console.log(all);
+									const collidedTrain = all[destructIndex];
+									for (let i = 2; i < collidedTrain.tab.length; i++) {
+										updateClone(plateau, collidedTrain.tab[i][0], collidedTrain.tab[i][1], Type_de_case.vide);
+									}
+									console.log(all);
+									all.splice(destructIndex, 1);
 								}
-								// Remove the collided train from the array
-								all.splice(destructIndex, 1);
-							}
-						
-							// Update the board to clear all positions of the current train
-							for (let i = 2; i < train.tab.length; i++) {
-								updateClone(plateau, train.tab[i][0], train.tab[i][1], Type_de_case.vide);
-							}
+								for (let i = 2; i < train.tab.length; i++) {
+									updateClone(plateau, train.tab[i][0], train.tab[i][1], Type_de_case.vide);
+								}
+								console.log(all);
+								all.splice(index, 1);
+								
 						}
+						
 						
 						
 						
