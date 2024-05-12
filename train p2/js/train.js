@@ -136,22 +136,34 @@
 	let nbpiece=0;
 	let nbbombe=0;
 	let bouton;
-	let firstIt = true
+	let firstIt = false;
 
 
 	/************************************************************/
 	/* Classes */
 	/************************************************************/
 	class Train {
-		constructor(dir,loc,wag1,wag2,wag3,wag4,wag5) {
-			this.tab=new Array(7);
-			this.tab=[dir,loc,wag1,wag2,wag3,wag4,wag5];
-			for(let i=this.tab.length - 1;i>=0;i--){
-				if(this.tab[i]==undefined)
-				this.tab.pop();
+		constructor(dir, loc, dir1, wag1, dir2, wag2, dir3, wag3, dir4, wag4, dir5, wag5) {
+			this.tab = [dir, loc, dir1, wag1, dir2, wag2, dir3, wag3, dir4, wag4, dir5, wag5];
+			// Clean undefined entries from the array
+			for (let i = this.tab.length - 1; i >= 0; i--) {
+				if (this.tab[i] === undefined)
+					this.tab.pop();
 			}
 		}
+	
+		toString() {
+			// Create a readable string representation of the train
+			let parts = [];
+			for (let i = 0; i < this.tab.length; i += 2) {
+				if (this.tab[i] !== undefined && this.tab[i + 1] !== undefined) {
+					parts.push(`Direction: ${this.tab[i]}, Wagon: ${this.tab[i + 1]}`);
+				}
+			}
+			return `Train [${parts.join(', ')}]`;
+		}
 	}
+	
 
 	/*------------------------------------------------------------*/
 	// Plateau
@@ -245,11 +257,11 @@
 	// Auditeurs
 	/************************************************************/
 
-
 	function setUpButtonClickEvents(contexte, plateau) {
-    
+
 		document.querySelectorAll('button:not(#bouton_pause)').forEach(button => {
 			button.addEventListener('click', function (event) {
+				console.log("click");
 				if (disabled) {
 					type_de_case = null;
 					console.log(type_de_case);
@@ -257,23 +269,24 @@
 					disabled = false;
 					canva.removeEventListener('click', recuperer_case);
 				} else {
-					 bouton = event.target;
+					bouton = event.target;
 					type_de_case = handleButtonClick(event);
 	
-					event.target.style.backgroundColor = ''; // Réinitialiser la couleur de fond du dernier bouton
+					//event.target.style.backgroundColor = ''; // Réinitialiser la couleur de fond du dernier bouton
 	
 					// Activer le bouton actuel
 					event.target.style.setProperty('transform', 'scale(1.3)');
 	
-					// Attacher l'événement pour récupérer les coordonnées de la case
-					canva.addEventListener('click', function (event) {
-						recuperer_case(event, contexte, plateau);
-					});
+	
 					disabled = true;
 	
 				}
 			});
 		});
+		 canva.addEventListener('click', function (event) {
+			   recuperer_case(event, contexte, plateau);
+		 });
+	
 	}
 
 	function toggleButtonSize(button) {
@@ -288,11 +301,14 @@
 			if(clone.cases[x][y] === Type_de_case.loco){ 
 				p = all.findIndex(train => train.tab[1][0] == x && train.tab[1][1] == y);
 				let train = all[p];
-				if (train.tab[0] == 0) {
-				train.tab[0] = 1;
-				} else {
-				train.tab[0] = 0;
-				}
+				for(let i=0;i<train.tab.length;i+=2){
+					if (train.tab[i] == 0) {
+						train.tab[i] = 1;
+					} 
+					else {
+						train.tab[i] = 0;
+					}
+				}	
 			}
 			else{
 				console.log("Impossible de changer la direction ici");
@@ -323,10 +339,10 @@
 	function recuperer_case(event, contexte, plateau) {
 		const x = Math.floor(event.offsetX / LARGEUR_CASE);
 		const y = Math.floor(event.offsetY / HAUTEUR_CASE);
-		if ((type_de_case.nom.includes('locomotive') )) {
+		if ((type_de_case.nom.includes('loco') )) {
 			creer_train(contexte, plateau,clone, x, y, type_de_case);
 		}
-		if ((!type_de_case.nom.includes('locomotive') )) {
+		else{
 			plateau.cases[x][y]=type_de_case;
 			console.log(type_de_case.nom + 'booo');
 			dessine_plateau(contexte, plateau);
@@ -479,21 +495,6 @@
 		}
 	}
 
-	function getCaseFromClone(clone, x, y) {
-		if (x >= 0 && x < clone.largeur && y >= 0 && y < clone.hauteur) {
-			const caseFromClone = clone.cases[x][y];
-			if (caseFromClone instanceof Type_de_case) {
-				return caseFromClone;
-			} else {
-				console.error("Invalid case type in clone at coordinates (" + x + ", " + y + ")");
-				return null;
-			}
-		} else {
-			console.error("Coordinates are out of bounds.");
-			return null;
-		}
-	}
-	
 	function updateCounter(value) {
 		let counter = document.getElementById('compteur');
 		let currentValue = parseInt(counter.textContent, 10);
@@ -560,14 +561,14 @@ function tchou() {
 		if(actif)
 			avancerTrains(plateau, contexte);
 	});
-	canva.addEventListener('click', function(event){
+	/*canva.addEventListener('click', function(event){
 		changer_direction(contexte, plateau, clone, 12, 10);
-	})
+	})*/
 }
 
 
 	function creer_train(contexte, plateau, clone, x, y, type_de_case) {
-
+		console.log('caca')
 		if(type_de_case === Type_de_case.loco){
 			if(plateau.cases[x][y] != Type_de_case.Rail_horizontal){
 				alert("Impossible de créer un train ici");
@@ -576,6 +577,7 @@ function tchou() {
 			else{
 				clone.cases[x][y]=Type_de_case.loco;
 				all.push(new Train(0,[x,y]));
+				console.log(all);
 				dessine_case(contexte, clone, x, y);
 				return;
 			}
@@ -589,7 +591,7 @@ function tchou() {
 			else{
 				clone.cases[x][y]=Type_de_case.loco;
 				clone.cases[x-1][y]=Type_de_case.wagon;
-				all.push(new Train(0,[x,y],[x-1,y]));
+				all.push(new Train(0,[x,y],0,[x-1,y]));
 				dessine_case(contexte, clone, x, y);
 				dessine_case(contexte, clone, x-1, y);
 				return;
@@ -609,7 +611,7 @@ function tchou() {
 				clone.cases[x-1][y]=Type_de_case.wagon;
 				clone.cases[x-2][y]=Type_de_case.wagon;
 				clone.cases[x-3][y]=Type_de_case.wagon;
-				all.push(new Train(0,[x,y],[x-1,y],[x-2,y],[x-3,y]));
+				all.push(new Train(0,[x,y],0,[x-1,y],0,[x-2,y],0,[x-3,y]));
 				dessine_case(contexte, clone, x, y);
 				dessine_case(contexte, clone, x-1, y);
 				dessine_case(contexte, clone, x-2, y);
@@ -634,7 +636,7 @@ function tchou() {
 				clone.cases[x-3][y]=Type_de_case.wagon;
 				clone.cases[x-4][y]=Type_de_case.wagon;
 				clone.cases[x-5][y]=Type_de_case.wagon;
-				all.push(new Train(0,[x,y],[x-1,y],[x-2,y],[x-3,y],[x-4,y],[x-5,y]));
+				all.push(new Train(0,[x,y],0,[x-1,y],0,[x-2,y],0,[x-3,y],0,[x-4,y],0,[x-5,y]));
 				dessine_case(contexte, clone, x, y);
 				dessine_case(contexte, clone, x-1, y);
 				dessine_case(contexte, clone, x-2, y);
@@ -658,9 +660,11 @@ function tchou() {
 			
 			
 			let train = element;
+
+	
 			let x = train.tab[1][0];
 			let y = train.tab[1][1];
-			if (firstIt === true){
+			if (firstIt === false){
 				predX = x; 
 				predY = y; 
 			}
@@ -733,11 +737,9 @@ function tchou() {
 				py=deplacementY + y;
 				
 				if(px>=plateau.largeur || py>=plateau.hauteur || px<0 || py<0){
-					for (let i = 1; i < train.tab.length; i++) {
-						updateClone(plateau, x, y, Type_de_case.vide);
-						//dessine_case(contexte, clone, x, y);
-						train.tab.splice(i, 1);
-					}
+					for(i=1;i<train.tab.length;i+=2)
+							updateClone(plateau, train.tab[i][0], train.tab[i][1], Type_de_case.vide);
+						element.tab.splice(i);
 				}
 				else{
 					if(plateau.cases[px][py].nom.includes('rail')){
@@ -752,8 +754,9 @@ function tchou() {
 						|| (railActuel === Type_de_case.Rail_vertical && plateau.cases[px][py].nom.includes('rail horizontal'))
 						|| (railActuel === Type_de_case.Rail_vertical && plateau.cases[px][py].nom.includes('rail horizontal'))
 						){
-							updateClone(plateau, x, y, Type_de_case.vide);
-							element.tab.splice(i, 1);
+							for(let i=1;i<train.tab.length;i+=2)
+								updateClone(plateau, train.tab[i][0], train.tab[i][1], Type_de_case.vide);
+							element.tab.splice(i);
 						}
 						else{
 							if(clone.cases[px][py].nom.includes('piece')){
@@ -764,30 +767,37 @@ function tchou() {
 								updateCounter(-1);
 								nbbombe--;
 							}
-							for (let i = 1; i < element.tab.length; i++) {
-								predX= train.tab[i][0]; 
-								predY= train.tab[i][1];
-								train.tab[i][0] = px-(i-1)*deplacementX;
-								train.tab[i][1] = py-(i-1)*deplacementY;
-								updateClone(plateau, px-(i-1)*deplacementX, py-(i-1)*deplacementY, clone.cases[x-(i-1)*deplacementX][y-(i-1)*deplacementY]);
-								updateClone(plateau, x-(i-1)*deplacementX, y-(i-1)*deplacementY, Type_de_case.vide);
-								if(nbbombe==0)
-									ajouterBombe(plateau,5);
-								if(nbpiece==0)
-									ajouterPiecesOr(plateau,5);
-								console.log(px + " : " + py);
+							
+							predX= train.tab[1][0]; 
+							predY= train.tab[1][1];
+							for(let i=3;i<train.tab.length;i+=2){
+								updateClone(plateau, train.tab[i][0], train.tab[i][1], Type_de_case.vide);
+								train.tab[i][0]=train.tab[i-2][0];
+								train.tab[i][1]=train.tab[i-2][1];
+								updateClone(plateau, train.tab[i][0], train.tab[i][1], Type_de_case.wagon);
 							}
-							firstIt = false;
+							train.tab[1][0] = px;
+							train.tab[1][1] = py;
+							updateClone(plateau, px, py, Type_de_case.loco);
+							updateClone(plateau, x, y, Type_de_case.vide);
+							if(nbbombe==0)
+								ajouterBombe(plateau,5);
+							if(nbpiece==0)
+								ajouterPiecesOr(plateau,5);
+							console.log(px + " : " + py);
+						
+							firstIt=true;
 						}
 					}
 					else{
-						for (let i = 1; i < element.tab.length; i++) {
-							updateClone(plateau, x-i*deplacementX, y-i*deplacementY, Type_de_case.vide);
-							train.tab.splice(i, 1);
-						}
+						for(let i=1;i<train.tab.length;i+=2)
+							updateClone(plateau, train.tab[i][0], train.tab[i][1], Type_de_case.vide);
+						element.tab.splice(i);
 					}
 				}
 			}
+		
+			
 		
 		});
 				
@@ -798,7 +808,7 @@ function tchou() {
 		},500);
 
 	}
-	
+
 
 	/**********************************************************string**/
 	// Programme principal
