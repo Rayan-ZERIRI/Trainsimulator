@@ -1,4 +1,4 @@
-/************************************************************/
+/*****************************  train partie 2 *******************************/
 
 
 
@@ -87,7 +87,7 @@
 	IMAGE_BOMBE.src = 'images/bombe.png';
 
 	const IMAGE_PIECE_OR = new Image();
-	IMAGE_PIECE_OR.src = 'images/piece.png'; // Assurez-vous que le chemin est correct
+	IMAGE_PIECE_OR.src = 'images/piece.png';
 
 	const IMAGE_EAU = new Image();
 	IMAGE_EAU.src = 'images/eau.png';
@@ -129,15 +129,12 @@
 	let plateau;
 	let all=new Array();
 	let p=0;
-	let predX, predY;
 	let disabled = false;
 	let actif=true;
 	let pause=document.getElementById('bouton_pause');
 	let nbpiece=0;
 	let nbbombe=0;
 	let bouton;
-	let firstIt = false;
-
 
 	/************************************************************/
 	/* Classes */
@@ -145,7 +142,7 @@
 	class Train {
 		constructor(pred, dir, loc, wag1, wag2, wag3, wag4, wag5) {
 			this.tab = [pred, dir, loc, wag1, wag2, wag3, wag4, wag5];
-			// Clean undefined entries from the array
+
 			for (let i = this.tab.length - 1; i >= 0; i--) {
 				if (this.tab[i] === undefined)
 					this.tab.pop();
@@ -153,7 +150,7 @@
 		}
 	
 		toString() {
-			// Create a readable string representation of the train
+
 			let parts = [];
 			for (let i = 0; i < this.tab.length; i += 2) {
 				if (this.tab[i] !== undefined && this.tab[i + 1] !== undefined) {
@@ -170,7 +167,7 @@
 	/*------------------------------------------------------------*/
 
 	class Plateau{
-	/* Constructeur d'un plateau vierge */
+
 		constructor(){
 			this.largeur = LARGEUR_PLATEAU;
 			this.hauteur = HAUTEUR_PLATEAU;
@@ -185,7 +182,7 @@
 	}
 
 	class Clone{
-		/* Constructeur d'un plateau vierge */
+
 			constructor(){
 				this.largeur = LARGEUR_PLATEAU;
 				this.hauteur = HAUTEUR_PLATEAU;
@@ -239,7 +236,6 @@
 			contexte.fillRect(x * LARGEUR_CASE, y * HAUTEUR_CASE, LARGEUR_CASE, HAUTEUR_CASE);
 		}
 
-		// Draw the image
 		contexte.drawImage(image_a_afficher, x * LARGEUR_CASE, y * HAUTEUR_CASE, LARGEUR_CASE, HAUTEUR_CASE);
 	}
 
@@ -291,18 +287,14 @@
 			if(clone.cases[x][y] === Type_de_case.loco && type_de_case === null){ 
 				p = all.findIndex(train => train.tab[2][0] == x && train.tab[2][1] == y);
 				let train = all[p];
-				for(let i=1;i<train.tab.length;i+=2){
-					if (train.tab[i] == 0) {
-						train.tab[i] = 1;
-					} 
-					else {
-						train.tab[i] = 0;
-					}
-				}	
-			}
-			else{
-				console.log("Impossible de changer la direction ici");
-			}
+				if (train.tab[1] == 0) {
+					train.tab[1] = 1;
+				} 
+				else {
+					train.tab[1] = 0;
+				}
+			}	
+		
 		});	
 	}	
 
@@ -329,7 +321,6 @@
 		}
 		else{
 			plateau.cases[x][y]=type_de_case;
-			console.log(type_de_case.nom + 'booo');
 			dessine_plateau(contexte, plateau);
 		}
 
@@ -451,15 +442,11 @@
 		plateau.cases[13][7] = Type_de_case.Rail_horizontal;
 		plateau.cases[14][7] = Type_de_case.Rail_horizontal;
 	}
-	//CLONE FUNCTIONS C POUR STOCK LES TRAINS
-	function clonePlateau(plateau) {
-		const clone = new Plateau(); // Create a new Plateau object
 
-		// Copy the dimensions of the plateau
+	function clonePlateau(plateau) {
+		const clone = new Plateau();
 		clone.largeur = plateau.largeur;
 		clone.hauteur = plateau.hauteur;
-
-		// Copy the state of each case on the plateau
 		for (let x = 0; x < plateau.largeur; x++) {
 			for (let y = 0; y < plateau.hauteur; y++) {
 				clone.cases[x][y] = plateau.cases[x][y];
@@ -470,13 +457,10 @@
 	}
 
 	function updateClone(plateau, x, y, type_de_case) {
-		// Check if the provided coordinates are within the bounds of the plateau
 		if (x >= 0 && x < plateau.largeur && y >= 0 && y < plateau.hauteur) {
-			// Update the clone with the last clicked button type at the specified coordinates
 			clone.cases[x][y] = type_de_case;
 		} else {
-			// Handle the case if the coordinates are out of bounds
-			console.error("Coordinates are out of bounds.");
+			console.error("erreur 404 xD");
 		}
 	}
 
@@ -485,7 +469,7 @@
 		let currentValue = parseInt(counter.textContent, 10);
 		currentValue += value;
 		if (currentValue < 0) {
-			currentValue = 0; // Prevents the counter from going negative.
+			currentValue = 0; 
 		}
 		counter.textContent = currentValue.toString().padStart(3, '0');
 	}
@@ -497,14 +481,13 @@
 			let y = Math.floor(Math.random() * HAUTEUR_PLATEAU);
 			
 			if (plateau.cases[x][y].nom.includes('rail') && clone.cases[x][y] != Type_de_case.bombe && !(clone.cases[x][y].nom.includes('locomotive')||clone.cases[x][y].nom.includes('wagon'))) { 
-				// Supposons que les pièces peuvent seulement être placées sur l'herbe
 				clone.cases[x][y] = Type_de_case.piece;
 				dessine_case(contexte,plateau,x,y);
 				dessine_case(contexte,clone,x,y);
 				nbpiece++;
 				
 			} else {
-				i--; // Compensez l'incrémentation pour retenter
+				i--;
 			}
 		}
 	}
@@ -514,13 +497,12 @@
 			let y = Math.floor(Math.random() * HAUTEUR_PLATEAU);
 			
 			if (plateau.cases[x][y].nom.includes('rail') && clone.cases[x][y] != Type_de_case.piece && !(clone.cases[x][y].nom.includes('locomotive')||clone.cases[x][y].nom.includes('wagon'))) { 
-				// Supposons que les pièces peuvent seulement être placées sur l'herbe
 				clone.cases[x][y] = Type_de_case.bombe;
 				dessine_case(contexte,plateau,x,y);
 				dessine_case(contexte,clone,x,y);
 				nbbombe++;
 			} else {
-				i--; // Compensez l'incrémentation pour retenter
+				i--; 
 			}
 		}
 	}
@@ -554,7 +536,6 @@ function tchou() {
 
 
 	function creer_train(contexte, plateau, clone, x, y, type_de_case) {
-		console.log('caca')
 		if(type_de_case === Type_de_case.loco){
 			if(plateau.cases[x][y] != Type_de_case.Rail_horizontal){
 				alert("Impossible de créer un train ici");
@@ -562,8 +543,7 @@ function tchou() {
 			}
 			else{
 				clone.cases[x][y]=Type_de_case.loco;
-				all.push(new Train(true,0,[x,y]));
-				console.log(all);
+				all.push(new Train([x,y],0,[x,y]));
 				dessine_case(contexte, clone, x, y);
 				return;
 			}
@@ -577,7 +557,7 @@ function tchou() {
 			else{
 				clone.cases[x][y]=Type_de_case.loco;
 				clone.cases[x-1][y]=Type_de_case.wagon;
-				all.push(new Train(true, 0,[x,y],0,[x-1,y]));
+				all.push(new Train([x,y], 0,[x,y],[x-1,y]));
 				dessine_case(contexte, clone, x, y);
 				dessine_case(contexte, clone, x-1, y);
 				return;
@@ -597,7 +577,7 @@ function tchou() {
 				clone.cases[x-1][y]=Type_de_case.wagon;
 				clone.cases[x-2][y]=Type_de_case.wagon;
 				clone.cases[x-3][y]=Type_de_case.wagon;
-				all.push(new Train(true, 0,[x,y],0,[x-1,y],0,[x-2,y],0,[x-3,y]));
+				all.push(new Train([x,y], 0,[x,y],[x-1,y],[x-2,y],[x-3,y]));
 				dessine_case(contexte, clone, x, y);
 				dessine_case(contexte, clone, x-1, y);
 				dessine_case(contexte, clone, x-2, y);
@@ -622,7 +602,7 @@ function tchou() {
 				clone.cases[x-3][y]=Type_de_case.wagon;
 				clone.cases[x-4][y]=Type_de_case.wagon;
 				clone.cases[x-5][y]=Type_de_case.wagon;
-				all.push(new Train(true, 0,[x,y],0,[x-1,y],0,[x-2,y],0,[x-3,y],0,[x-4,y],0,[x-5,y]));
+				all.push(new Train([x,y], 0,[x,y],[x-1,y],[x-2,y],[x-3,y],[x-4,y],[x-5,y]));
 				dessine_case(contexte, clone, x, y);
 				dessine_case(contexte, clone, x-1, y);
 				dessine_case(contexte, clone, x-2, y);
@@ -642,28 +622,21 @@ function tchou() {
 		}
 		
 		for (let index = all.length - 1; index >= 0; index--) {
-
 			
 			
-			let train = all[index];
-
-	
+			
+			let train = all[index];	
 			let x = train.tab[2][0];
 			let y = train.tab[2][1];
-			if (train.tab[0] === true){
-				predX = x; 
-				predY = y; 
-			}
+			
 			let railActuel = plateau.cases[x][y];
 			
-			let railprecedent = plateau.cases[predX][predY];
+			let railprecedent = plateau.cases[train.tab[0][0]][train.tab[0][1]];
 			let deplacementX = 0;
 			let deplacementY = 0;
 
 		
-			// Check if the current case contains a rail    
 			if (railActuel.nom.includes('rail')) {
-				// Determine the movement based on the type of rail
 				switch (railActuel) {
 					case Type_de_case.Rail_horizontal:
 						if (train.tab[1] == 0)
@@ -714,7 +687,6 @@ function tchou() {
 						}
 						break;
 					default:
-						// Handle unexpected case
 						break;
 				}
 				let px = 0;
@@ -723,8 +695,8 @@ function tchou() {
 				py=deplacementY + y;
 				
 				if(px>=plateau.largeur || py>=plateau.hauteur || px<0 || py<0){
-					for(i=2;i<train.tab.length;i+=2)
-						updateClone(plateau, train.tab[2][0], train.tab[2][1], Type_de_case.vide);
+					for(i=2;i<train.tab.length;i++)
+						updateClone(plateau, train.tab[i][0], train.tab[i][1], Type_de_case.vide);
 					all.splice(index, 1);
 				}
 				else{
@@ -737,12 +709,35 @@ function tchou() {
 						|| (railActuel === Type_de_case.Rail_vertical && plateau.cases[px][py].nom.includes('rail horizontal'))	
 						|| (railActuel === Type_de_case.Rail_vertical && plateau.cases[px][py].nom.includes('rail horizontal'))
 						|| (railActuel === Type_de_case.Rail_vertical && plateau.cases[px][py].nom.includes('rail horizontal'))
-						|| clone.cases[px][py].nom.includes('loc') || clone.cases[px][py].nom.includes('wagon')
 						){
-							for(let i=2;i<train.tab.length;i+=2)
-								updateClone(plateau, train.tab[2][0], train.tab[2][1], Type_de_case.vide);
+							for(let i=2;i<train.tab.length;i++)
+								updateClone(plateau, train.tab[i][0], train.tab[i][1], Type_de_case.vide);
 							all.splice(index, 1);
 						}
+						else if (clone.cases[px][py].nom.includes('loc') || clone.cases[px][py].nom.includes('wagon')) {
+							let destructIndex = all.findIndex(train => 
+								train.tab.slice(2).some(coord => coord[0] === px && coord[1] === py)
+							);
+						
+							// If a collided train is found
+							if (destructIndex !== -1) {
+								// Update the board to clear all positions of the collided train
+								const collidedTrain = all[destructIndex];
+								for (let i = 2; i < collidedTrain.tab.length; i++) {
+									updateClone(plateau, collidedTrain.tab[i][0], collidedTrain.tab[i][1], Type_de_case.vide);
+								}
+								// Remove the collided train from the array
+								all.splice(destructIndex, 1);
+							}
+						
+							// Update the board to clear all positions of the current train
+							for (let i = 2; i < train.tab.length; i++) {
+								updateClone(plateau, train.tab[i][0], train.tab[i][1], Type_de_case.vide);
+							}
+						}
+						
+						
+						
 						else{
 							if(clone.cases[px][py].nom.includes('piece')){
 								updateCounter(1);
@@ -752,32 +747,38 @@ function tchou() {
 								updateCounter(-1);
 								nbbombe--;
 							}
-							
-							predX= train.tab[2][0]; 
-							predY= train.tab[2][1];
-							for(let i=4;i<train.tab.length;i+=2){
-								updateClone(plateau, train.tab[i][0], train.tab[i][1], Type_de_case.vide);
-								train.tab[i][0]=train.tab[i-2][0];
-								train.tab[i][1]=train.tab[i-2][1];
-								updateClone(plateau, train.tab[i][0], train.tab[i][1], Type_de_case.wagon);
-								console.log('avant'+train.tab[i][0] + " : " + train.tab[i][1]);
-							}
+					
+							train.tab[0][0]= train.tab[2][0]; 
+							train.tab[0][1]= train.tab[2][1];
+							const oldLocoPosition = [train.tab[2][0], train.tab[2][1]];
 							train.tab[2][0] = px;
 							train.tab[2][1] = py;
-							console.log('apres'+train.tab[2][0] + " : " + train.tab[2][1]);
-							updateClone(plateau, px, py, Type_de_case.loco);
-							if(train.tab.length<4)
-								updateClone(plateau, x, y, Type_de_case.vide);
+							updateClone(plateau, px, py, Type_de_case.loco);  
+
+							
+							for (let i = 3; i < train.tab.length; i++) {
+								if (Array.isArray(train.tab[i])) {
+									const oldWagonPosition = [train.tab[i][0], train.tab[i][1]]; 
+									train.tab[i][0] = oldLocoPosition[0];
+									train.tab[i][1] = oldLocoPosition[1];
+									updateClone(plateau, oldLocoPosition[0], oldLocoPosition[1], Type_de_case.wagon); 
+									oldLocoPosition[0] = oldWagonPosition[0]; 
+									oldLocoPosition[1] = oldWagonPosition[1];
+								} else {
+									console.error(`train.tab[${i}] is not an array, found:`, train.tab[i]);
+								}
+							}
+							updateClone(plateau, oldLocoPosition[0], oldLocoPosition[1], Type_de_case.vide);
+
+
 							if(nbbombe==0)
 								ajouterBombe(plateau,5);
 							if(nbpiece==0)
 								ajouterPiecesOr(plateau,5);
-						
-							train.tab[0]= false;
 						}
 					}
 					else{
-						for(let i=2;i<train.tab.length;i+=2)
+						for(let i=2;i<train.tab.length;i++)
 							updateClone(plateau, train.tab[i][0], train.tab[i][1], Type_de_case.vide);
 						all.splice(index, 1);
 					}
