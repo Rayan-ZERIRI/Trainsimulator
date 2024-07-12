@@ -6,7 +6,7 @@ pour lancer le site web, allez sur le répertoire version finale et ouvrez train
 Youcef Rayan ZERIRI 
 Delsuc Florian 
 # Images
-Toutes les images sauf foret.png et eau.png ont été déssinées par nous
+Toutes les images sauf foret.png,eau.png et background.jpg ont été déssinées par nous
 # Fonctionalités
 Amélioration de l'ergonomie et de l'interface graphique.
 Un système de  score en haut à droite selon si le train passe par une pièce/bombe (+1/-1).
