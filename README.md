@@ -1,8 +1,8 @@
 # Trainsimulator
 Site web de simulateur de train
 # Membres
-Youcef Rayan ZERIRI 12107613
-Delsuc Florian 12102407
+Youcef Rayan ZERIRI 
+Delsuc Florian 
 # Images
 Toutes les images sauf foret.png et eau.png ont été déssinées par nous
 # Fonctionalités
