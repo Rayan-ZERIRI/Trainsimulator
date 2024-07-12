@@ -1,5 +1,7 @@
 # Trainsimulator
 Site web de simulateur de train
+#Execution
+pour lancer le site web, allez sur le répertoire version finale et ouvrez train.html sur votre navigateur
 # Membres
 Youcef Rayan ZERIRI 
 Delsuc Florian 
